@@ -1,6 +1,43 @@
 #include "component1impl.h"
 #include <QDebug>
 
+ULONG CComponent1Impl::AddRef() {
+    iRefCount++;
+    return iRefCount;
+}
+
+ULONG CComponent1Impl::Release() {
+    iRefCount--;
+
+    if (iRefCount == 0) {
+        delete this;
+    }
+
+    return iRefCount;
+}
+
+HRESULT CComponent1Impl::QueryInterface(int riid, void **ppvObject) {
+    if (!ppvObject) {
+        return E_INVALIDARG;
+    }
+
+    *ppvObject = 0;
+
+    if (riid == IID_IUnknown)
+    {
+        *ppvObject = (void**)this;
+        this->AddRef();
+    } else if (riid == IID_IComponent1faceX) {
+        *ppvObject = (void**)(IComponent1faceX*)this;
+        this->AddRef();
+    } else if (riid == IID_IComponent1faceY) {
+        *ppvObject = (void**)(IComponent1faceY*)this;
+        this->AddRef();
+    }
+
+    return *ppvObject != 0 ? S_OK : E_NOINTERFACE;
+}
+
 void CComponent1Impl::methodX1() {
     qDebug() << "methodX1 in CComponent1Impl called";
 }
