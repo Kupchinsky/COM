@@ -5,6 +5,8 @@ HRESULT SERVERDLLSHARED_EXPORT GetClassObjectPseudo(int rclsid, int riid, void *
         return E_INVALIDARG;
     }
 
+    *ppv = NULL;
+
     if (rclsid == CLSID_Component1) {
         CComponent1ClassFactory *cf = new CComponent1ClassFactory();
         return cf->QueryInterface(riid, ppv);
@@ -21,6 +23,8 @@ HRESULT SERVERDLLSHARED_EXPORT CreateInstancePseudo(int rclsid, int riid, void *
        return E_INVALIDARG;
    }
 
+   *ppv = NULL;
+
    IClassFactoryPseudo *cf = NULL;
    HRESULT result = GetClassObjectPseudo(rclsid, riid, (void**) &cf);
 
@@ -28,7 +32,7 @@ HRESULT SERVERDLLSHARED_EXPORT CreateInstancePseudo(int rclsid, int riid, void *
        return result;
    }
 
-   result = cf->CreateInstance(riid, (void**) &ppv);
+   result = cf->CreateInstance(riid, ppv);
    cf->Release();
 
    return result;

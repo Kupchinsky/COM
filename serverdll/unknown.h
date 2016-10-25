@@ -7,6 +7,11 @@
 #define IID_IUnknown 0
 #define IID_IClassFactory 1
 
+
+#undef S_OK
+#undef E_NOINTERFACE
+#undef E_INVALIDARG
+
 #define S_OK 0
 #define E_NOINTERFACE 1
 #define E_INVALIDARG 2
