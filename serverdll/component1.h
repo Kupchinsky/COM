@@ -7,6 +7,7 @@
 
 #define IID_IComponent1faceX 1
 #define IID_IComponent1faceY 2
+#define IID_IComponent1ClassFactory 3
 
 class IComponent1faceX: public IUnknownPseudo {
 public:
@@ -20,5 +21,8 @@ public:
     virtual void methodY1() = 0;
     virtual double methodY2() = 0;
     virtual int methodY3() = 0;
+};
+
+class IComponent1ClassFactory: public IClassFactoryPseudo {
 };
 #endif // COMPONENT1_H

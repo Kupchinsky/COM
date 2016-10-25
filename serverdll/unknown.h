@@ -17,4 +17,8 @@ public:
     virtual ULONG Release() = 0;
 };
 
+class IClassFactoryPseudo : public IUnknownPseudo {
+public:
+    virtual HRESULT CreateInstance(int rclsid, int riid, void **ppvObject) = 0;
+};
 #endif // UNKNOWN_H
