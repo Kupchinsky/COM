@@ -9,14 +9,14 @@
 #define IID_IComponent1faceY IID_IClassFactory + 2
 #define IID_IComponent1ClassFactory IID_IClassFactory + 3
 
-class IComponent1faceX: public IUnknownPseudo {
+class IComponent1faceX: public virtual IUnknownPseudo {
 public:
     virtual void methodX1() = 0;
     virtual int methodX2() = 0;
     virtual double methodX3() = 0;
 };
 
-class IComponent1faceY: public IUnknownPseudo {
+class IComponent1faceY: public virtual IUnknownPseudo {
 public:
     virtual void methodY1() = 0;
     virtual double methodY2() = 0;

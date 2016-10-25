@@ -21,20 +21,20 @@ HRESULT CComponent1Impl::QueryInterface(int riid, void **ppvObject) {
         return E_INVALIDARG;
     }
 
-    *ppvObject = 0;
+    *ppvObject = NULL;
 
     if (riid == IID_IUnknown) {
-        *ppvObject = (void**)this;
+        *ppvObject = static_cast<IUnknownPseudo*>(this);
         this->AddRef();
     } else if (riid == IID_IComponent1faceX) {
-        *ppvObject = (void**)(IComponent1faceX*)this;
+        *ppvObject = static_cast<IComponent1faceX*>(this);
         this->AddRef();
     } else if (riid == IID_IComponent1faceY) {
-        *ppvObject = (void**)(IComponent1faceY*)this;
+        *ppvObject = static_cast<IComponent1faceY*>(this);
         this->AddRef();
     }
 
-    return *ppvObject != 0 ? S_OK : E_NOINTERFACE;
+    return *ppvObject != NULL ? S_OK : E_NOINTERFACE;
 }
 
 void CComponent1Impl::methodX1() {
@@ -85,12 +85,21 @@ HRESULT CComponent1ClassFactory::QueryInterface(int riid, void **ppvObject) {
         return E_INVALIDARG;
     }
 
-    *ppvObject = 0;
+    *ppvObject = NULL;
 
     if (riid == IID_IUnknown || riid == IID_IClassFactory) {
         *ppvObject = static_cast<IClassFactoryPseudo*>(this);
         this->AddRef();
     }
 
-    return *ppvObject != 0 ? S_OK : E_NOINTERFACE;
+    return *ppvObject != NULL ? S_OK : E_NOINTERFACE;
+}
+
+HRESULT CComponent1ClassFactory::CreateInstance(int riid, void **ppvObject) {
+    if (!ppvObject) {
+        return E_INVALIDARG;
+    }
+
+    CComponent1Impl *impl = new CComponent1Impl();
+    return impl->QueryInterface(riid, ppvObject);
 }
