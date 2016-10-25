@@ -5,9 +5,9 @@
 
 #define CLSID_Component1 1
 
-#define IID_IComponent1faceX 1
-#define IID_IComponent1faceY 2
-#define IID_IComponent1ClassFactory 3
+#define IID_IComponent1faceX IID_IClassFactory + 1
+#define IID_IComponent1faceY IID_IClassFactory + 2
+#define IID_IComponent1ClassFactory IID_IClassFactory + 3
 
 class IComponent1faceX: public IUnknownPseudo {
 public:

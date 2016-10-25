@@ -23,8 +23,7 @@ HRESULT CComponent1Impl::QueryInterface(int riid, void **ppvObject) {
 
     *ppvObject = 0;
 
-    if (riid == IID_IUnknown)
-    {
+    if (riid == IID_IUnknown) {
         *ppvObject = (void**)this;
         this->AddRef();
     } else if (riid == IID_IComponent1faceX) {
@@ -64,4 +63,34 @@ double CComponent1Impl::methodY2() {
 int CComponent1Impl::methodY3() {
     qDebug() << "methodY3 in CComponent1Impl called";
     return 0;
+}
+
+ULONG CComponent1ClassFactory::AddRef() {
+    iRefCount++;
+    return iRefCount;
+}
+
+ULONG CComponent1ClassFactory::Release() {
+    iRefCount--;
+
+    if (iRefCount == 0) {
+        delete this;
+    }
+
+    return iRefCount;
+}
+
+HRESULT CComponent1ClassFactory::QueryInterface(int riid, void **ppvObject) {
+    if (!ppvObject) {
+        return E_INVALIDARG;
+    }
+
+    *ppvObject = 0;
+
+    if (riid == IID_IUnknown || riid == IID_IClassFactory) {
+        *ppvObject = static_cast<IClassFactoryPseudo*>(this);
+        this->AddRef();
+    }
+
+    return *ppvObject != 0 ? S_OK : E_NOINTERFACE;
 }

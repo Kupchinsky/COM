@@ -22,4 +22,15 @@ public:
     HRESULT QueryInterface(int riid, void **ppvObject);
 };
 
+class CComponent2ClassFactory: public IComponent2ClassFactory {
+    int iRefCount = 0;
+public:
+    virtual ~CComponent2ClassFactory() {
+    }
+
+    ULONG AddRef();
+    ULONG Release();
+    HRESULT QueryInterface(int riid, void **ppvObject);
+    HRESULT CreateInstance(int riid, void **ppvObject);
+};
 #endif // COMPONENT2IMPL_H

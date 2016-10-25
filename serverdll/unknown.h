@@ -5,6 +5,7 @@
 #define HRESULT long
 
 #define IID_IUnknown 0
+#define IID_IClassFactory 1
 
 #define S_OK 0
 #define E_NOINTERFACE 1
@@ -19,6 +20,6 @@ public:
 
 class IClassFactoryPseudo : public IUnknownPseudo {
 public:
-    virtual HRESULT CreateInstance(int rclsid, int riid, void **ppvObject) = 0;
+    virtual HRESULT CreateInstance(int riid, void **ppvObject) = 0;
 };
 #endif // UNKNOWN_H

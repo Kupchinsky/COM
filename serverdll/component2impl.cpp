@@ -23,8 +23,7 @@ HRESULT CComponent2Impl::QueryInterface(int riid, void **ppvObject) {
 
     *ppvObject = 0;
 
-    if (riid == IID_IUnknown)
-    {
+    if (riid == IID_IUnknown) {
         *ppvObject = (void**)this;
         this->AddRef();
     } else if (riid == IID_IComponent2faceX) {

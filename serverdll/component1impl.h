@@ -21,4 +21,16 @@ public:
     ULONG Release();
     HRESULT QueryInterface(int riid, void **ppvObject);
 };
+
+class CComponent1ClassFactory: public IComponent1ClassFactory {
+    int iRefCount = 0;
+public:
+    virtual ~CComponent1ClassFactory() {
+    }
+
+    ULONG AddRef();
+    ULONG Release();
+    HRESULT QueryInterface(int riid, void **ppvObject);
+    HRESULT CreateInstance(int riid, void **ppvObject);
+};
 #endif // COMPONENT1IMPL_H
