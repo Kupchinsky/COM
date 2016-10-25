@@ -8,6 +8,8 @@
 #include "component2impl.h"
 #include "serverdll_global.h"
 
-HRESULT SERVERDLLSHARED_EXPORT GetClassObjectPseudo(int rclsid, int riid, void **ppv);
-HRESULT SERVERDLLSHARED_EXPORT CreateInstancePseudo(int rclsid, int riid, void **ppv);
+extern "C" {
+    HRESULT SERVERDLLSHARED_EXPORT GetClassObjectPseudo(int rclsid, int riid, void **ppv);
+    HRESULT SERVERDLLSHARED_EXPORT CreateInstancePseudo(int rclsid, int riid, void **ppv);
+}
 #endif // SERVERDLL_H

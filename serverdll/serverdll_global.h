@@ -4,7 +4,7 @@
 #include <QtCore/qglobal.h>
 
 #if defined(SERVERDLL_LIBRARY)
-#  define SERVERDLLSHARED_EXPORT Q_DECL_EXPORT
+#  define SERVERDLLSHARED_EXPORT Q_DECL_EXPORT __stdcall
 #else
 #  define SERVERDLLSHARED_EXPORT Q_DECL_IMPORT
 #endif
