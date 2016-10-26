@@ -20,13 +20,13 @@ public:
     }
 };
 
-void checkResult(long result);
+void checkResult(HRESULT result);
 
-typedef ULONG __stdcall (*CreateInstancePseudo)(int rclsid, int riid, void **ppv);
-CreateInstancePseudo createInstancePseudo = NULL;
+typedef HRESULT __stdcall (*CreateInstancePseudo)(int rclsid, int riid, void **ppv);
+CreateInstancePseudo createInstancePseudo;
 
-typedef ULONG __stdcall (*GetClassObjectPseudo)(int rclsid, int riid, void **ppv);
-GetClassObjectPseudo getClassObjectPseudo = NULL;
+typedef HRESULT __stdcall (*GetClassObjectPseudo)(int rclsid, int riid, void **ppv);
+GetClassObjectPseudo getClassObjectPseudo;
 
 void testQueryInterfaceComponent1();
 void testQueryInterfaceComponent2();
@@ -60,28 +60,32 @@ int main(int argc, char **argv)
     getClassObjectPseudo = (GetClassObjectPseudo) GetProcAddress(hModule, "GetClassObjectPseudo@12");
     assert(getClassObjectPseudo != NULL);
 
-    testQueryInterfaceComponent1();
-    testQueryInterfaceComponent2();
+    try {
+        testQueryInterfaceComponent1();
+        testQueryInterfaceComponent2();
 
-    testFactoryComponent1();
-    testFactoryComponent2();
+        testFactoryComponent1();
+        testFactoryComponent2();
+    } catch (InvalidResultException& e) {
+        qDebug() << "Test failed. Exception throwed: " << e.what();
+    }
 
     FreeLibrary(hModule);
     return 0;
 }
 
-void checkResult(long result) {
+void checkResult(HRESULT result) {
     if (result != S_OK) {
         throw InvalidResultException(result);
     }
 }
 
 void testQueryInterfaceComponent1() {
-    IUnknownPseudo *iUnkPtr = NULL;
+    IUnknownPseudo *iUnkPtr;
     checkResult(createInstancePseudo(CLSID_Component1,  IID_IUnknown, (void**)&iUnkPtr));
     qDebug() << "Instance of IUnknownPseudo created";
 
-    IComponent1faceX *iXPtr = NULL;
+    IComponent1faceX *iXPtr;
     checkResult(iUnkPtr->QueryInterface(IID_IComponent1faceX, (void**)&iXPtr));
     qDebug() << "Query interface called for IID_IComponent1faceX";
 
@@ -127,11 +131,11 @@ void testQueryInterfaceComponent2() {
 }
 
 void testFactoryComponent1() {
-    IClassFactoryPseudo *iCfPtr = NULL;
+    IClassFactoryPseudo *iCfPtr;
     checkResult(getClassObjectPseudo(CLSID_Component1, IID_IClassFactory, (void**)&iCfPtr));
     qDebug() << "Instance of IClassFactoryPseudo created";
 
-    IComponent1faceX *iXPtr = NULL;
+    IComponent1faceX *iXPtr;
     checkResult(iCfPtr->CreateInstance(IID_IComponent1faceX, (void**)&iXPtr));
     qDebug() << "Query interface called for IID_IComponent1faceX";
 
@@ -152,11 +156,11 @@ void testFactoryComponent1() {
 }
 
 void testFactoryComponent2() {
-    IClassFactoryPseudo *iCfPtr = NULL;
+    IClassFactoryPseudo *iCfPtr;
     checkResult(getClassObjectPseudo(CLSID_Component2, IID_IClassFactory, (void**)&iCfPtr));
     qDebug() << "Instance of IClassFactoryPseudo created";
 
-    IComponent2faceX *iXPtr = NULL;
+    IComponent2faceX *iXPtr;
     checkResult(iCfPtr->CreateInstance(IID_IComponent2faceX, (void**)&iXPtr));
     qDebug() << "Query interface called for IID_IComponent2faceX";
 
