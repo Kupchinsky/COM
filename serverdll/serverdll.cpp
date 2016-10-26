@@ -26,7 +26,7 @@ HRESULT SERVERDLLSHARED_EXPORT CreateInstancePseudo(int rclsid, int riid, void *
    *ppv = NULL;
 
    IClassFactoryPseudo *cf = NULL;
-   HRESULT result = GetClassObjectPseudo(rclsid, riid, (void**) &cf);
+   HRESULT result = GetClassObjectPseudo(rclsid, IID_IClassFactory, (void**) &cf);
 
    if (result != S_OK) {
        return result;
