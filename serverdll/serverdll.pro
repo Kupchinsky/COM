@@ -27,3 +27,9 @@ unix {
     target.path = /usr/lib
     INSTALLS += target
 }
+
+Release:QMAKE_LINK = dlltool -e release/exports.o --add-stdcall-alias release/serverdll.o && g++
+Debug:QMAKE_LINK = dlltool -e debug/exports.o --add-stdcall-alias debug/serverdll.o && g++
+
+Release:LIBS += release/exports.o
+Debug:LIBS += debug/exports.o
