@@ -29,14 +29,22 @@ int main(int argc, char **argv)
     HMODULE hModule = LoadLibraryA(argv[1]);
     assert(hModule != NULL);
 
+    bool bError = false;
+
     try {
         CTestNoManager::run(hModule);
     } catch (InvalidResultException& e) {
         qDebug() << "Test failed. Exception throwed: " << e.what();
+        bError = true;
     }
 
     FreeLibrary(hModule);
-    qDebug() << "Test passed.";
+
+    if (!bError) {
+        qDebug() << "Test passed.";
+    } else {
+        return 1;
+    }
 
     qDebug() << "Testing manager work...";
     qDebug() << "Loading " << argv[2];
@@ -48,10 +56,16 @@ int main(int argc, char **argv)
         CTestManager::run(hModule);
     } catch (InvalidResultException& e) {
         qDebug() << "Test failed. Exception throwed: " << e.what();
+        bError = true;
     }
 
     FreeLibrary(hModule);
-    qDebug() << "Test passed.";
+
+    if (!bError) {
+        qDebug() << "Test passed.";
+    } else {
+        return 1;
+    }
 
     return 0;
 }

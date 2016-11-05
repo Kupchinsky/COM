@@ -16,6 +16,9 @@ class CTestManager {
         getClassObjectPseudo(_getClassObjectPseudo),
         freeUnusedLibraries(_freeUnusedLibraries) {
     }
+
+    void testFactoryComponent1();
+    void testFactoryComponent2();
 public:
     static void run(HMODULE hModule);
 };

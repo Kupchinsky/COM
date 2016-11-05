@@ -12,9 +12,33 @@ void CTestNoManager::run(HMODULE hModule) {
     getClassObjectPseudo = (Server_DllGetClassObjectPseudo) GetProcAddress(hModule, "DllGetClassObjectPseudo");
     assert(getClassObjectPseudo != NULL);
 
-    CTestNoManager manager(getClassObjectPseudo);
-    manager.testFactoryComponent1();
-    manager.testFactoryComponent2();
+    Server_DllRegisterServer dllRegisterServer;
+    dllRegisterServer = (Server_DllRegisterServer) GetProcAddress(hModule, "DllRegisterServer");
+    assert(dllRegisterServer != NULL);
+
+    Server_DllUnregisterServer dllUnregisterServer;
+    dllUnregisterServer = (Server_DllUnregisterServer) GetProcAddress(hModule, "DllUnregisterServer");
+    assert(dllUnregisterServer != NULL);
+
+    CTestNoManager tester(getClassObjectPseudo, dllRegisterServer, dllUnregisterServer);
+
+    tester.testRegister();
+
+    // Component should be registered before run test with manager
+    // tester.testUnregister();
+
+    tester.testFactoryComponent1();
+    tester.testFactoryComponent2();
+}
+
+void CTestNoManager::testRegister() {
+    qDebug() << "Testing register...";
+    ResultChecker::check(dllRegisterServer());
+}
+
+void CTestNoManager::testUnregister() {
+    qDebug() << "Testing unregister...";
+    ResultChecker::check(dllUnregisterServer());
 }
 
 void CTestNoManager::testFactoryComponent1() {

@@ -29,27 +29,23 @@ BOOL APIENTRY DllMain(HANDLE hModule, DWORD dwReason, void* lpReserved) {
 }
 
 _HRESULT SERVERDLLSHARED_EXPORT DllRegisterServer() {
-    CLocalRegistry *registry = CLocalRegistry::getInstance().get();
-    QJsonObject jsonObject = registry->getRoot();
-
     char szBuff[MAX_PATH];
     GetModuleFileNameA(g_hModule, szBuff, sizeof(szBuff));
 
-    jsonObject.insert(QString::number(CLSID_Component1), QJsonValue(szBuff));
-    jsonObject.insert(QString::number(CLSID_Component2), QJsonValue(szBuff));
-
+    CLocalRegistry *registry = CLocalRegistry::getInstance().get();
+    registry->insertComponentModule(CLSID_Component1, QString(szBuff));
+    registry->insertComponentModule(CLSID_Component2, QString(szBuff));
     registry->write();
+
     return _S_OK;
 }
 
 _HRESULT SERVERDLLSHARED_EXPORT DllUnregisterServer() {
     CLocalRegistry *registry = CLocalRegistry::getInstance().get();
-    QJsonObject jsonObject = registry->getRoot();
-
-    jsonObject.remove(QString::number(CLSID_Component1));
-    jsonObject.remove(QString::number(CLSID_Component2));
-
+    registry->removeComponent(CLSID_Component1);
+    registry->removeComponent(CLSID_Component2);
     registry->write();
+
     return _S_OK;
 }
 

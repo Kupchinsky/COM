@@ -10,10 +10,8 @@ static QMap<QString, HMODULE> loadedLibraries;
 
 BOOL APIENTRY DllMain(HANDLE hModule, DWORD dwReason, void* lpReserved) {
     if (dwReason == DLL_PROCESS_DETACH) {
-        FreeUnusedLibraries();
-
         if (!loadedLibraries.empty()) {
-            qDebug() << "Error! Some modules not unloaded:";
+            qDebug() << "Attention! Some modules not unloaded:";
 
             foreach (QString path, loadedLibraries.keys()) {
                 qDebug() << "[" << path << "]";
@@ -32,12 +30,9 @@ _HRESULT MANAGERDLLSHARED_EXPORT GetClassObjectPseudo(_REFCLSID rclsid, _REFIID 
     *ppv = NULL;
 
     CLocalRegistry *registry = CLocalRegistry::getInstance().get();
-    QJsonObject jsonObject = registry->getRoot();
+    QString path;
 
-    QJsonValue value = jsonObject.value(QString::number(rclsid));
-
-    if (!value.isUndefined()) {
-        QString path = value.toString();
+    if (registry->queryComponentModule(rclsid, path)) {
         HMODULE hModule = NULL;
 
         if (loadedLibraries.contains(path)) {
@@ -97,7 +92,9 @@ void MANAGERDLLSHARED_EXPORT FreeUnusedLibraries() {
             FreeLibrary(hModule);
             qDebug() << "Module unloaded: " << iterator.key();
 
-            loadedLibraries.erase(iterator);
+            iterator = loadedLibraries.erase(iterator);
+        } else {
+            ++iterator;
         }
     }
 }
