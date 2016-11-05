@@ -15,7 +15,7 @@ class CLocalRegistry {
     QJsonDocument document;
     static unique_ptr<CLocalRegistry> instance;
 
-    CLocalRegistry(QJsonDocument& document): document(document) {
+    CLocalRegistry(QJsonDocument& _document): document(_document) {
     }
 public:
     QJsonObject getRoot();

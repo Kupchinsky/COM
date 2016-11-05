@@ -13,4 +13,5 @@ SOURCES += main.cpp \
     test_nomanager.cpp
 
 HEADERS += \
-    test_nomanager.h
+    test_nomanager.h \
+    result_checker.h
