@@ -1,7 +1,7 @@
 #ifndef TEST_NOMANAGER_H
 #define TEST_NOMANAGER_H
 
-#include "pseudo_definitions.h"
+#include "../pseudo_definitions.h"
 #include <windows.h>
 
 class CTestNoManager

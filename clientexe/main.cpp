@@ -4,11 +4,34 @@
 #include <windows.h>
 #include <cassert>
 
-#include "pseudo_definitions.h"
+#include "../pseudo_definitions.h"
 #include "test_nomanager.h"
 #include "../serverdll/component1.h"
 #include "../serverdll/component2.h"
 #include "../unknown.h"
+
+class InvalidResultException: public QException {
+    _HRESULT result;
+public:
+    InvalidResultException();
+    QString what();
+};
+
+void checkResult(_HRESULT result);
+
+InvalidResultException::InvalidResultException(_HRESULT result) {
+    this->result = result;
+}
+
+QString InvalidResultException::what() {
+    return QString("Not successfull result: ") + QString::number(result);
+}
+
+void checkResult(_HRESULT result) {
+    if (result != _S_OK) {
+        throw InvalidResultException(result);
+    }
+}
 
 int main(int argc, char **argv)
 {

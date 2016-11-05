@@ -11,10 +11,12 @@ TEMPLATE = lib
 
 DEFINES += MANAGERDLL_LIBRARY
 
-SOURCES += managerdll.cpp
+SOURCES += managerdll.cpp \
+    ../localregistry.cpp
 
 HEADERS += managerdll.h\
-        managerdll_global.h
+        managerdll_global.h \
+    ../localregistry.h
 
 unix {
     target.path = /usr/lib
