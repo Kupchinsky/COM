@@ -9,4 +9,10 @@ CONFIG -= app_bundle
 
 TEMPLATE = app
 
-SOURCES += main.cpp
+SOURCES += main.cpp \
+    test_nomanager.cpp \
+    pseudo_definitions.cpp
+
+HEADERS += \
+    test_nomanager.h \
+    pseudo_definitions.h

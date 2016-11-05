@@ -8,6 +8,6 @@ _HRESULT MANAGERDLLSHARED_EXPORT CreateInstancePseudo(_REFCLSID rclsid, _REFIID 
 
 }
 
-void MANAGERDLLSHARED_EXPORT CoFreeUnusedLibraries() {
+void MANAGERDLLSHARED_EXPORT FreeUnusedLibraries() {
 
 }
