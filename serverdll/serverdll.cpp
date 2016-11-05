@@ -3,9 +3,22 @@
 
 #include <windows.h>
 #include <QJsonValue>
+#include <QDebug>
 
 static HMODULE g_hModule = NULL;
 static _ULONG g_ObjectsInUse = 0;
+
+void IncrementObjectsInUse() {
+    g_ObjectsInUse++;
+}
+
+void DecrementObjectsInUse() {
+    g_ObjectsInUse--;
+
+    if (g_ObjectsInUse < 0) {
+        qDebug() << "g_ObjectsInUse < 0, something went wrong";
+    }
+}
 
 BOOL APIENTRY DllMain(HANDLE hModule, DWORD dwReason, void* lpReserved) {
     if (dwReason == DLL_PROCESS_ATTACH) {

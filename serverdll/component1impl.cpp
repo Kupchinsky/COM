@@ -1,13 +1,17 @@
 #include "component1impl.h"
+#include "serverdll.h"
 #include <QDebug>
 
 _ULONG CComponent1Impl::AddRef() {
     iRefCount++;
+    IncrementObjectsInUse();
+
     return iRefCount;
 }
 
 _ULONG CComponent1Impl::Release() {
     iRefCount--;
+    DecrementObjectsInUse();
 
     if (iRefCount == 0) {
         delete this;
@@ -67,11 +71,14 @@ int CComponent1Impl::methodY3() {
 
 _ULONG CComponent1ClassFactory::AddRef() {
     iRefCount++;
+    IncrementObjectsInUse();
+
     return iRefCount;
 }
 
 _ULONG CComponent1ClassFactory::Release() {
     iRefCount--;
+    DecrementObjectsInUse();
 
     if (iRefCount == 0) {
         delete this;

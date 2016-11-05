@@ -10,6 +10,9 @@
 
 #include <windows.h>
 
+void IncrementObjectsInUse();
+void DecrementObjectsInUse();
+
 extern "C" {
     BOOL APIENTRY DllMain(HANDLE hModule, DWORD dwReason, void* lpReserved);
 
