@@ -5,11 +5,12 @@
 
 #include "../pseudo_definitions.h"
 #include "test_nomanager.h"
+#include "test_manager.h"
 #include "result_checker.h"
 
 int main(int argc, char **argv)
 {
-    if (argc < 2) {
+    if (argc < 3) {
         qDebug() << "No args!";
         return 1;
     }
@@ -22,15 +23,29 @@ int main(int argc, char **argv)
         qDebug() << "Test passed. Exception throwed: " << e.what();
     }
 
+    qDebug() << "Testing no-manager work...";
     qDebug() << "Loading " << argv[1];
 
     HMODULE hModule = LoadLibraryA(argv[1]);
     assert(hModule != NULL);
 
-    qDebug() << "Testing no-manager work...";
-
     try {
         CTestNoManager::run(hModule);
+    } catch (InvalidResultException& e) {
+        qDebug() << "Test failed. Exception throwed: " << e.what();
+    }
+
+    FreeLibrary(hModule);
+    qDebug() << "Test passed.";
+
+    qDebug() << "Testing manager work...";
+    qDebug() << "Loading " << argv[2];
+
+    hModule = LoadLibraryA(argv[2]);
+    assert(hModule != NULL);
+
+    try {
+        CTestManager::run(hModule);
     } catch (InvalidResultException& e) {
         qDebug() << "Test failed. Exception throwed: " << e.what();
     }
