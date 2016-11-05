@@ -13,22 +13,24 @@ DEFINES += SERVERDLL_LIBRARY
 
 SOURCES += serverdll.cpp \
     component1impl.cpp \
-    component2impl.cpp
+    component2impl.cpp \
+    ../localregistry.cpp
 
 HEADERS += serverdll.h\
         serverdll_global.h \
     component1.h \
     component2.h \
     component1impl.h \
-    component2impl.h
+    component2impl.h \
+    ../localregistry.h
 
 unix {
     target.path = /usr/lib
     INSTALLS += target
 }
 
-Release:QMAKE_LINK = dlltool -e release/exports.o --add-stdcall-alias release/serverdll.o && g++
-Debug:QMAKE_LINK = dlltool -e debug/exports.o --add-stdcall-alias debug/serverdll.o && g++
+Release:QMAKE_LINK = dlltool -e release/exports.o --kill-at release/serverdll.o && g++
+Debug:QMAKE_LINK = dlltool -e debug/exports.o --kill-at debug/serverdll.o && g++
 
 Release:LIBS += release/exports.o
 Debug:LIBS += debug/exports.o

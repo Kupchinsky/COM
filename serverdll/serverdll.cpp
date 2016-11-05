@@ -1,6 +1,46 @@
 #include "serverdll.h"
+#include "../localregistry.h"
 
-_HRESULT SERVERDLLSHARED_EXPORT GetClassObjectPseudo(_REFCLSID rclsid, _REFIID riid, void **ppv) {
+#include <windows.h>
+#include <QJsonValue>
+
+static HMODULE g_hModule = NULL;
+static _ULONG g_ObjectsInUse = 0;
+
+BOOL APIENTRY DllMain(HANDLE hModule, DWORD dwReason, void* lpReserved) {
+    if (dwReason == DLL_PROCESS_ATTACH) {
+        g_hModule = (HMODULE) hModule;
+    }
+
+    return TRUE;
+}
+
+_HRESULT SERVERDLLSHARED_EXPORT DllRegisterServer() {
+    CLocalRegistry *registry = CLocalRegistry::getInstance().get();
+    QJsonObject jsonObject = registry->getRoot();
+
+    char szBuff[MAX_PATH];
+    GetModuleFileNameA(g_hModule, szBuff, sizeof(szBuff));
+
+    jsonObject.insert(QString::number(CLSID_Component1), QJsonValue(szBuff));
+    jsonObject.insert(QString::number(CLSID_Component2), QJsonValue(szBuff));
+
+    registry->write();
+    return _S_OK;
+}
+
+_HRESULT SERVERDLLSHARED_EXPORT DllUnregisterServer() {
+    CLocalRegistry *registry = CLocalRegistry::getInstance().get();
+    QJsonObject jsonObject = registry->getRoot();
+
+    jsonObject.remove(QString::number(CLSID_Component1));
+    jsonObject.remove(QString::number(CLSID_Component2));
+
+    registry->write();
+    return _S_OK;
+}
+
+_HRESULT SERVERDLLSHARED_EXPORT DllGetClassObjectPseudo(_REFCLSID rclsid, _REFIID riid, void **ppv) {
     if (!ppv) {
         return _E_INVALIDARG;
     }
@@ -15,25 +55,9 @@ _HRESULT SERVERDLLSHARED_EXPORT GetClassObjectPseudo(_REFCLSID rclsid, _REFIID r
         return cf->QueryInterface(riid, ppv);
     }
 
-    return _E_NOINTERFACE;
+    return _E_CLASSNOTAVAILABLE;
 }
 
-_HRESULT SERVERDLLSHARED_EXPORT CreateInstancePseudo(_REFCLSID rclsid, _REFIID riid, void **ppv) {
-   if (!ppv) {
-       return _E_INVALIDARG;
-   }
-
-   *ppv = NULL;
-
-   IClassFactoryPseudo *cf = NULL;
-   _HRESULT result = GetClassObjectPseudo(rclsid, IID_IClassFactoryPseudo, (void**) &cf);
-
-   if (result != _S_OK) {
-       return result;
-   }
-
-   result = cf->CreateInstance(riid, ppv);
-   cf->Release();
-
-   return result;
+_HRESULT SERVERDLLSHARED_EXPORT DllCanUnloadNow() {
+    return g_ObjectsInUse == 0 ? _S_OK : _S_FALSE;
 }

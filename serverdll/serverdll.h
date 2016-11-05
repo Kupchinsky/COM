@@ -8,8 +8,14 @@
 #include "component2impl.h"
 #include "serverdll_global.h"
 
+#include <windows.h>
+
 extern "C" {
-    _HRESULT SERVERDLLSHARED_EXPORT GetClassObjectPseudo(_REFCLSID rclsid, _REFCLSID riid, void **ppv);
-    _HRESULT SERVERDLLSHARED_EXPORT CreateInstancePseudo(_REFCLSID rclsid, _REFCLSID riid, void **ppv);
+    BOOL APIENTRY DllMain(HANDLE hModule, DWORD dwReason, void* lpReserved);
+
+    _HRESULT SERVERDLLSHARED_EXPORT DllRegisterServer();
+    _HRESULT SERVERDLLSHARED_EXPORT DllUnregisterServer();
+    _HRESULT SERVERDLLSHARED_EXPORT DllGetClassObjectPseudo(_REFCLSID rclsid, _REFIID riid, void **ppv);
+    _HRESULT SERVERDLLSHARED_EXPORT DllCanUnloadNow();
 }
 #endif // SERVERDLL_H

@@ -13,6 +13,8 @@
 #define _S_OK 0
 #define _E_NOINTERFACE 1
 #define _E_INVALIDARG 2
+#define _E_CLASSNOTAVAILABLE 3
+#define _S_FALSE 4
 
 class IUnknownPseudo {
 public:

@@ -21,8 +21,8 @@ unix {
     INSTALLS += target
 }
 
-Release:QMAKE_LINK = dlltool -e release/exports.o --add-stdcall-alias release/managerdll.o && g++
-Debug:QMAKE_LINK = dlltool -e debug/exports.o --add-stdcall-alias debug/managerdll.o && g++
+Release:QMAKE_LINK = dlltool -e release/exports.o --kill-at release/managerdll.o && g++
+Debug:QMAKE_LINK = dlltool -e debug/exports.o --kill-at debug/managerdll.o && g++
 
 Release:LIBS += release/exports.o
 Debug:LIBS += debug/exports.o
