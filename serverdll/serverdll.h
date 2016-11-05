@@ -1,7 +1,7 @@
 #ifndef SERVERDLL_H
 #define SERVERDLL_H
 
-#include "unknown.h"
+#include "../unknown.h"
 #include "component1.h"
 #include "component1impl.h"
 #include "component2.h"
@@ -9,7 +9,7 @@
 #include "serverdll_global.h"
 
 extern "C" {
-    HRESULT SERVERDLLSHARED_EXPORT GetClassObjectPseudo(int rclsid, int riid, void **ppv);
-    HRESULT SERVERDLLSHARED_EXPORT CreateInstancePseudo(int rclsid, int riid, void **ppv);
+    _HRESULT SERVERDLLSHARED_EXPORT GetClassObjectPseudo(_REFCLSID rclsid, _REFCLSID riid, void **ppv);
+    _HRESULT SERVERDLLSHARED_EXPORT CreateInstancePseudo(_REFCLSID rclsid, _REFCLSID riid, void **ppv);
 }
 #endif // SERVERDLL_H

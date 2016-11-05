@@ -17,9 +17,9 @@ public:
     virtual ~CComponent1Impl() {
     }
 
-    ULONG AddRef();
-    ULONG Release();
-    HRESULT QueryInterface(int riid, void **ppvObject);
+    _ULONG AddRef();
+    _ULONG Release();
+    _HRESULT QueryInterface(_REFIID riid, void **ppvObject);
 };
 
 class CComponent1ClassFactory: public IComponent1ClassFactory {
@@ -28,9 +28,9 @@ public:
     virtual ~CComponent1ClassFactory() {
     }
 
-    ULONG AddRef();
-    ULONG Release();
-    HRESULT QueryInterface(int riid, void **ppvObject);
-    HRESULT CreateInstance(int riid, void **ppvObject);
+    _ULONG AddRef();
+    _ULONG Release();
+    _HRESULT QueryInterface(_REFIID riid, void **ppvObject);
+    _HRESULT CreateInstance(_REFIID riid, void **ppvObject);
 };
 #endif // COMPONENT1IMPL_H

@@ -1,12 +1,12 @@
 #include "component1impl.h"
 #include <QDebug>
 
-ULONG CComponent1Impl::AddRef() {
+_ULONG CComponent1Impl::AddRef() {
     iRefCount++;
     return iRefCount;
 }
 
-ULONG CComponent1Impl::Release() {
+_ULONG CComponent1Impl::Release() {
     iRefCount--;
 
     if (iRefCount == 0) {
@@ -16,14 +16,14 @@ ULONG CComponent1Impl::Release() {
     return iRefCount;
 }
 
-HRESULT CComponent1Impl::QueryInterface(int riid, void **ppvObject) {
+_HRESULT CComponent1Impl::QueryInterface(_REFIID riid, void **ppvObject) {
     if (!ppvObject) {
-        return E_INVALIDARG;
+        return _E_INVALIDARG;
     }
 
     *ppvObject = NULL;
 
-    if (riid == IID_IUnknown) {
+    if (riid == IID_IUnknownPseudo) {
         *ppvObject = static_cast<IUnknownPseudo*>(this);
         this->AddRef();
     } else if (riid == IID_IComponent1faceX) {
@@ -34,7 +34,7 @@ HRESULT CComponent1Impl::QueryInterface(int riid, void **ppvObject) {
         this->AddRef();
     }
 
-    return *ppvObject != NULL ? S_OK : E_NOINTERFACE;
+    return *ppvObject != NULL ? _S_OK : _E_NOINTERFACE;
 }
 
 void CComponent1Impl::methodX1() {
@@ -65,12 +65,12 @@ int CComponent1Impl::methodY3() {
     return 0;
 }
 
-ULONG CComponent1ClassFactory::AddRef() {
+_ULONG CComponent1ClassFactory::AddRef() {
     iRefCount++;
     return iRefCount;
 }
 
-ULONG CComponent1ClassFactory::Release() {
+_ULONG CComponent1ClassFactory::Release() {
     iRefCount--;
 
     if (iRefCount == 0) {
@@ -80,24 +80,24 @@ ULONG CComponent1ClassFactory::Release() {
     return iRefCount;
 }
 
-HRESULT CComponent1ClassFactory::QueryInterface(int riid, void **ppvObject) {
+_HRESULT CComponent1ClassFactory::QueryInterface(_REFIID riid, void **ppvObject) {
     if (!ppvObject) {
-        return E_INVALIDARG;
+        return _E_INVALIDARG;
     }
 
     *ppvObject = NULL;
 
-    if (riid == IID_IUnknown || riid == IID_IClassFactory) {
+    if (riid == IID_IUnknownPseudo || riid == IID_IClassFactoryPseudo) {
         *ppvObject = static_cast<IClassFactoryPseudo*>(this);
         this->AddRef();
     }
 
-    return *ppvObject != NULL ? S_OK : E_NOINTERFACE;
+    return *ppvObject != NULL ? _S_OK : _E_NOINTERFACE;
 }
 
-HRESULT CComponent1ClassFactory::CreateInstance(int riid, void **ppvObject) {
+_HRESULT CComponent1ClassFactory::CreateInstance(_REFIID riid, void **ppvObject) {
     if (!ppvObject) {
-        return E_INVALIDARG;
+        return _E_INVALIDARG;
     }
 
     CComponent1Impl *impl = new CComponent1Impl();

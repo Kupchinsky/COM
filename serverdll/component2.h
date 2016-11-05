@@ -1,13 +1,13 @@
 #ifndef COMPONENT2_H
 #define COMPONENT2_H
 
-#include "unknown.h"
+#include "../unknown.h"
 
 #define CLSID_Component2 2
 
-#define IID_IComponent2faceX IID_IClassFactory + 1
-#define IID_IComponent2faceY IID_IClassFactory + 2
-#define IID_IComponent2ClassFactory IID_IClassFactory + 3
+#define IID_IComponent2faceX IID_IClassFactoryPseudo + 1
+#define IID_IComponent2faceY IID_IClassFactoryPseudo + 2
+#define IID_IComponent2ClassFactory IID_IClassFactoryPseudo + 3
 
 class IComponent2faceX: public virtual IUnknownPseudo {
 public:

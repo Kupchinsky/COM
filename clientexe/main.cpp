@@ -6,7 +6,7 @@
 
 #include "../serverdll/component1.h"
 #include "../serverdll/component2.h"
-#include "../serverdll/unknown.h"
+#include "../unknown.h"
 
 class InvalidResultException: public QException {
     long result;
@@ -20,12 +20,12 @@ public:
     }
 };
 
-void checkResult(HRESULT result);
+void checkResult(_HRESULT result);
 
-typedef HRESULT __stdcall (*CreateInstancePseudo)(int rclsid, int riid, void **ppv);
+typedef _HRESULT __stdcall (*CreateInstancePseudo)(_REFCLSID rclsid, _REFIID riid, void **ppv);
 CreateInstancePseudo createInstancePseudo;
 
-typedef HRESULT __stdcall (*GetClassObjectPseudo)(int rclsid, int riid, void **ppv);
+typedef _HRESULT __stdcall (*GetClassObjectPseudo)(_REFCLSID rclsid, _REFIID riid, void **ppv);
 GetClassObjectPseudo getClassObjectPseudo;
 
 void testQueryInterfaceComponent1();
@@ -54,10 +54,10 @@ int main(int argc, char **argv)
     HMODULE hModule = LoadLibraryA(argv[1]);
     assert(hModule != NULL);
 
-    createInstancePseudo = (CreateInstancePseudo) GetProcAddress(hModule, "CreateInstancePseudo@12");
+    createInstancePseudo = (CreateInstancePseudo) GetProcAddress(hModule, "CreateInstancePseudo");
     assert(createInstancePseudo != NULL);
 
-    getClassObjectPseudo = (GetClassObjectPseudo) GetProcAddress(hModule, "GetClassObjectPseudo@12");
+    getClassObjectPseudo = (GetClassObjectPseudo) GetProcAddress(hModule, "GetClassObjectPseudo");
     assert(getClassObjectPseudo != NULL);
 
     try {
@@ -74,15 +74,15 @@ int main(int argc, char **argv)
     return 0;
 }
 
-void checkResult(HRESULT result) {
-    if (result != S_OK) {
+void checkResult(_HRESULT result) {
+    if (result != _S_OK) {
         throw InvalidResultException(result);
     }
 }
 
 void testQueryInterfaceComponent1() {
     IUnknownPseudo *iUnkPtr;
-    checkResult(createInstancePseudo(CLSID_Component1,  IID_IUnknown, (void**)&iUnkPtr));
+    checkResult(createInstancePseudo(CLSID_Component1,  IID_IUnknownPseudo, (void**)&iUnkPtr));
     qDebug() << "Instance of IUnknownPseudo created";
 
     IComponent1faceX *iXPtr;
@@ -107,7 +107,7 @@ void testQueryInterfaceComponent1() {
 
 void testQueryInterfaceComponent2() {
     IUnknownPseudo *iUnkPtr;
-    checkResult(createInstancePseudo(CLSID_Component2,  IID_IUnknown, (void**)&iUnkPtr));
+    checkResult(createInstancePseudo(CLSID_Component2,  IID_IUnknownPseudo, (void**)&iUnkPtr));
     qDebug() << "Instance of IUnknownPseudo created";
 
     IComponent2faceX *iXPtr;
@@ -132,7 +132,7 @@ void testQueryInterfaceComponent2() {
 
 void testFactoryComponent1() {
     IClassFactoryPseudo *iCfPtr;
-    checkResult(getClassObjectPseudo(CLSID_Component1, IID_IClassFactory, (void**)&iCfPtr));
+    checkResult(getClassObjectPseudo(CLSID_Component1, IID_IClassFactoryPseudo, (void**)&iCfPtr));
     qDebug() << "Instance of IClassFactoryPseudo created";
 
     IComponent1faceX *iXPtr;
@@ -157,7 +157,7 @@ void testFactoryComponent1() {
 
 void testFactoryComponent2() {
     IClassFactoryPseudo *iCfPtr;
-    checkResult(getClassObjectPseudo(CLSID_Component2, IID_IClassFactory, (void**)&iCfPtr));
+    checkResult(getClassObjectPseudo(CLSID_Component2, IID_IClassFactoryPseudo, (void**)&iCfPtr));
     qDebug() << "Instance of IClassFactoryPseudo created";
 
     IComponent2faceX *iXPtr;

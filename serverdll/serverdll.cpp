@@ -1,8 +1,8 @@
 #include "serverdll.h"
 
-HRESULT SERVERDLLSHARED_EXPORT GetClassObjectPseudo(int rclsid, int riid, void **ppv) {
+_HRESULT SERVERDLLSHARED_EXPORT GetClassObjectPseudo(_REFCLSID rclsid, _REFIID riid, void **ppv) {
     if (!ppv) {
-        return E_INVALIDARG;
+        return _E_INVALIDARG;
     }
 
     *ppv = NULL;
@@ -15,20 +15,20 @@ HRESULT SERVERDLLSHARED_EXPORT GetClassObjectPseudo(int rclsid, int riid, void *
         return cf->QueryInterface(riid, ppv);
     }
 
-    return E_NOINTERFACE;
+    return _E_NOINTERFACE;
 }
 
-HRESULT SERVERDLLSHARED_EXPORT CreateInstancePseudo(int rclsid, int riid, void **ppv) {
+_HRESULT SERVERDLLSHARED_EXPORT CreateInstancePseudo(_REFCLSID rclsid, _REFIID riid, void **ppv) {
    if (!ppv) {
-       return E_INVALIDARG;
+       return _E_INVALIDARG;
    }
 
    *ppv = NULL;
 
    IClassFactoryPseudo *cf = NULL;
-   HRESULT result = GetClassObjectPseudo(rclsid, IID_IClassFactory, (void**) &cf);
+   _HRESULT result = GetClassObjectPseudo(rclsid, IID_IClassFactoryPseudo, (void**) &cf);
 
-   if (result != S_OK) {
+   if (result != _S_OK) {
        return result;
    }
 

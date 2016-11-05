@@ -17,7 +17,6 @@ SOURCES += serverdll.cpp \
 
 HEADERS += serverdll.h\
         serverdll_global.h \
-    unknown.h \
     component1.h \
     component2.h \
     component1impl.h \
