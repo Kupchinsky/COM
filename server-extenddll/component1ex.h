@@ -4,7 +4,7 @@
 #include "../unknown.h"
 #include "../serverdll/component1.h"
 
-#define CLSID_Component1 1
+#define CLSID_ComponentEx1 1
 
 #define IID_IComponentEx1face IID_IClassFactoryPseudo + 1
 #define IID_IComponentEx1ClassFactory IID_IClassFactoryPseudo + 2

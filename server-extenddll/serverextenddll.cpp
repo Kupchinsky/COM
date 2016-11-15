@@ -1,5 +1,7 @@
 #include "serverextenddll.h"
 #include "../localregistry.h"
+#include "component1ex.h"
+#include "component1eximpl.h"
 
 #include <windows.h>
 #include <QJsonValue>
@@ -33,8 +35,7 @@ _HRESULT SERVEREXTENDDLLSHARED_EXPORT DllRegisterServer() {
     GetModuleFileNameA(g_hModule, szBuff, sizeof(szBuff));
 
     CLocalRegistry *registry = CLocalRegistry::getInstance().get();
-    registry->insertComponentModule(CLSID_Component1, QString(szBuff));
-    registry->insertComponentModule(CLSID_Component2, QString(szBuff));
+    registry->insertComponentModule(CLSID_ComponentEx1, QString(szBuff));
     registry->write();
 
     return _S_OK;
@@ -42,8 +43,7 @@ _HRESULT SERVEREXTENDDLLSHARED_EXPORT DllRegisterServer() {
 
 _HRESULT SERVEREXTENDDLLSHARED_EXPORT DllUnregisterServer() {
     CLocalRegistry *registry = CLocalRegistry::getInstance().get();
-    registry->removeComponent(CLSID_Component1);
-    registry->removeComponent(CLSID_Component2);
+    registry->removeComponent(CLSID_ComponentEx1);
     registry->write();
 
     return _S_OK;
@@ -56,11 +56,8 @@ _HRESULT SERVEREXTENDDLLSHARED_EXPORT DllGetClassObjectPseudo(_REFCLSID rclsid, 
 
     *ppv = NULL;
 
-    if (rclsid == CLSID_Component1) {
-        CComponent1ClassFactory *cf = new CComponent1ClassFactory();
-        return cf->QueryInterface(riid, ppv);
-    } else if (rclsid == CLSID_Component2) {
-        CComponent2ClassFactory *cf = new CComponent2ClassFactory();
+    if (rclsid == CLSID_ComponentEx1) {
+        CComponentEx1ClassFactory *cf = new CComponentEx1ClassFactory();
         return cf->QueryInterface(riid, ppv);
     }
 

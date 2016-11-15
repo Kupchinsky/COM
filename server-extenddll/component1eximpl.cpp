@@ -2,10 +2,9 @@
 #include "serverextenddll.h"
 #include <QDebug>
 #include <cassert>
-#include "../clientexe/result_checker.h"
 
 CComponentEx1Impl::CComponentEx1Impl() {
-    this->hManager = GetModuleHandle();
+    this->hManager = GetModuleHandleA("managerdll.dll");
     assert(this->hManager != NULL);
 
     this->createInstancePseudo = (Manager_CreateInstancePseudo) GetProcAddress(this->hManager, "CreateInstancePseudo");
@@ -14,13 +13,13 @@ CComponentEx1Impl::CComponentEx1Impl() {
     this->freeUnusedLibraries = (Manager_FreeUnusedLibraries) GetProcAddress(this->hManager, "FreeUnusedLibraries");
     assert(this->freeUnusedLibraries != NULL);
 
-    IUnknownPseudo ptr;
+    IUnknownPseudo *ptr;
     assert(this->createInstancePseudo(CLSID_Component1, IID_IUnknownPseudo, (void**) &ptr) == S_OK);
 
-    assert(ptr.QueryInterface(IID_IComponent1faceX, (void**) &this->delegateX) == S_OK);
-    assert(ptr.QueryInterface(IID_IComponent1faceY, (void**) &this->delegateY) == S_OK);
+    assert(ptr->QueryInterface(IID_IComponent1faceX, (void**) &this->delegateX) == S_OK);
+    assert(ptr->QueryInterface(IID_IComponent1faceY, (void**) &this->delegateY) == S_OK);
 
-    ptr.Release();
+    ptr->Release();
 }
 
 _ULONG CComponentEx1Impl::AddRef() {
@@ -101,14 +100,14 @@ void CComponentEx1Impl::methodX4() {
     qDebug() << "methodX4 in CComponentEx1Impl called";
 }
 
-_ULONG CComponent1ClassFactory::AddRef() {
+_ULONG CComponentEx1ClassFactory::AddRef() {
     iRefCount++;
     IncrementObjectsInUse();
 
     return iRefCount;
 }
 
-_ULONG CComponent1ClassFactory::Release() {
+_ULONG CComponentEx1ClassFactory::Release() {
     iRefCount--;
     DecrementObjectsInUse();
 

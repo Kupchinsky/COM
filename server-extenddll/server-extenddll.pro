@@ -12,7 +12,8 @@ TEMPLATE = lib
 DEFINES += SERVEREXTENDDLL_LIBRARY
 
 SOURCES += serverextenddll.cpp \
-    component1eximpl.cpp
+    component1eximpl.cpp \
+    ../localregistry.cpp
 
 HEADERS += serverextenddll.h\
         server-extenddll_global.h \
