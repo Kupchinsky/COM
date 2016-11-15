@@ -22,6 +22,18 @@ CComponentEx1Impl::CComponentEx1Impl() {
     ptr->Release();
 }
 
+CComponentEx1Impl::~CComponentEx1Impl() {
+    if (this->delegateX != NULL) {
+        this->delegateX->Release();
+        this->delegateX = NULL;
+    }
+
+    if (this->delegateY != NULL) {
+        this->delegateY->Release();
+        this->delegateY = NULL;
+    }
+}
+
 _ULONG CComponentEx1Impl::AddRef() {
     iRefCount++;
     IncrementObjectsInUse();
@@ -34,17 +46,6 @@ _ULONG CComponentEx1Impl::Release() {
     DecrementObjectsInUse();
 
     if (iRefCount == 0) {
-        if (this->delegateX != NULL) {
-            this->delegateX->Release();
-            this->delegateX = NULL;
-        }
-
-        if (this->delegateY != NULL) {
-            this->delegateY->Release();
-            this->delegateY = NULL;
-        }
-
-        this->freeUnusedLibraries();
         delete this;
     }
 
@@ -66,6 +67,9 @@ _HRESULT CComponentEx1Impl::QueryInterface(_REFIID riid, void **ppvObject) {
         this->AddRef();
     } else if (riid == IID_IComponent1faceY) {
         *ppvObject = static_cast<IComponent1faceY*>(this);
+        this->AddRef();
+    } else if (riid == IID_IComponentEx1face) {
+        *ppvObject = static_cast<IComponentEx1face*>(this);
         this->AddRef();
     }
 

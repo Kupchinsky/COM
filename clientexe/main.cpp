@@ -10,6 +10,7 @@
 
 int main(int argc, char **argv)
 {
+    // Args: serverdll, managerdll
     if (argc < 3) {
         qDebug() << "No args!";
         return 1;

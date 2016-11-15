@@ -4,10 +4,10 @@
 #include "../unknown.h"
 #include "../serverdll/component1.h"
 
-#define CLSID_ComponentEx1 1
+#define CLSID_ComponentEx1 3
 
-#define IID_IComponentEx1face IID_IClassFactoryPseudo + 1
-#define IID_IComponentEx1ClassFactory IID_IClassFactoryPseudo + 2
+#define IID_IComponentEx1face IID_IClassFactoryPseudo + 4
+#define IID_IComponentEx1ClassFactory IID_IClassFactoryPseudo + 5
 
 class IComponentEx1face: public virtual IUnknownPseudo,
         public virtual IComponent1faceX,

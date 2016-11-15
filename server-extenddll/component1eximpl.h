@@ -28,8 +28,7 @@ public:
     void methodX4();
 
     CComponentEx1Impl();
-    virtual ~CComponentEx1Impl() {
-    }
+    virtual ~CComponentEx1Impl();
 
     _ULONG AddRef();
     _ULONG Release();
