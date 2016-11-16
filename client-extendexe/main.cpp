@@ -56,7 +56,7 @@ int main(int argc, char *argv[])
         qDebug() << "Attempt to query and use original component interfaces...";
         IComponent1faceX *ptrX = NULL;
         ResultChecker::check(ptr->QueryInterface(IID_IComponent1faceX, (void**) &ptrX));
-        ptr->methodX1();
+        ptrX->methodX1();
         ptrX->Release();
 
         IComponent1faceY *ptrY = NULL;

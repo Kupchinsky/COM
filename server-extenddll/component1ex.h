@@ -9,20 +9,8 @@
 #define IID_IComponentEx1face IID_IClassFactoryPseudo + 4
 #define IID_IComponentEx1ClassFactory IID_IClassFactoryPseudo + 5
 
-class IComponentEx1face: public virtual IUnknownPseudo,
-        public virtual IComponent1faceX,
-        public virtual IComponent1faceY {
+class IComponentEx1face: public virtual IUnknownPseudo {
 public:
-    // Methods from original IComponent1faceX
-    virtual void methodX1() = 0;
-    virtual int methodX2() = 0;
-    virtual double methodX3() = 0;
-
-    // Methods from original IComponent1faceY
-    virtual void methodY1() = 0;
-    virtual double methodY2() = 0;
-    virtual int methodY3() = 0;
-
     // New methods
     virtual void methodX4() = 0;
 };

@@ -6,7 +6,9 @@
 #include "component1ex.h"
 #include <windows.h>
 
-class CComponentEx1Impl: public IComponentEx1face {
+class CComponentEx1Impl: public virtual IComponentEx1face,
+    public virtual IComponent1faceX,
+    public virtual IComponent1faceY {
     HMODULE hManager;
 
     Manager_CreateInstancePseudo createInstancePseudo;
