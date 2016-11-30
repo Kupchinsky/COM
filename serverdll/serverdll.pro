@@ -11,18 +11,18 @@ TEMPLATE = lib
 
 DEFINES += SERVERDLL_LIBRARY
 
-SOURCES += serverdll.cpp \
-    component1impl.cpp \
-    component2impl.cpp \
-    ../localregistry.cpp
+SOURCES += \
+    componentimpl.cpp \
+    componentfactory.cpp \
+    component_i.c \
+    serverdll.cpp
 
-HEADERS += serverdll.h\
-        serverdll_global.h \
-    component1.h \
-    component2.h \
-    component1impl.h \
-    component2impl.h \
-    ../localregistry.h
+HEADERS +=\
+    componentimpl.h \
+    component.h \
+    componentfactory.h \
+    serverdll.h \
+    serverdll_global.h
 
 unix {
     target.path = /usr/lib
@@ -34,3 +34,5 @@ Debug:QMAKE_LINK = dlltool -e debug/exports.o --kill-at debug/serverdll.o && g++
 
 Release:LIBS += release/exports.o
 Debug:LIBS += debug/exports.o
+
+LIBS += -luuid -loleaut32
