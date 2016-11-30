@@ -8,8 +8,10 @@
 
 #include <windows.h>
 
-void IncrementObjectsInUse();
-void DecrementObjectsInUse();
+static HMODULE g_hModule = NULL;
+static ULONG g_ObjectsInUse = 0;
+
+#define ProgId "Kupchinskiy.ProcessManager"
 
 extern "C" {
     BOOL APIENTRY DllMain(HANDLE hModule, DWORD dwReason, void* lpReserved);

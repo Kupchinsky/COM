@@ -1,4 +1,5 @@
 #include "componentfactory.h"
+#include "serverdll.h"
 
 HRESULT STDMETHODCALLTYPE CProcessMonitorImplFactory::QueryInterface(REFIID riid, void **ppvObject) {
     if (riid == IID_IUnknown) {
@@ -17,11 +18,13 @@ HRESULT STDMETHODCALLTYPE CProcessMonitorImplFactory::QueryInterface(REFIID riid
 
 ULONG STDMETHODCALLTYPE CProcessMonitorImplFactory::AddRef() {
     InterlockedIncrement(&this->lRefCount);
+    InterlockedIncrement(&g_ObjectsInUse);
     return S_OK;
 }
 
 ULONG STDMETHODCALLTYPE CProcessMonitorImplFactory::Release() {
     long nRefCount = InterlockedDecrement(&this->lRefCount);
+    InterlockedDecrement(&g_ObjectsInUse);
 
     if (nRefCount == 0) {
         delete this;
