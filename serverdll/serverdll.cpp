@@ -34,7 +34,10 @@ HRESULT SERVERDLLSHARED_EXPORT DllGetClassObject(REFCLSID rclsid, REFIID riid, v
 
     *ppv = NULL;
 
-    // TODO
+    if (rclsid == LIBID_ProcessManager) {
+        CProcessMonitorImplFactory *cf = new CProcessMonitorImplFactory();
+        return cf->QueryInterface(riid, ppv);
+    }
 
     return CLASS_E_CLASSNOTAVAILABLE;
 }

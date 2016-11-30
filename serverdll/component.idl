@@ -18,3 +18,15 @@ interface IProcessMonitor: IUnknown
     [id(7)] HRESULT getChangedStatusFirst([out] unsigned int *pid, [out, retval] unsigned int *status);
     [id(8)] HRESULT getChangedStatusNext([out] unsigned int *pid, [out, retval] unsigned int *status);
 }
+
+[
+uuid(3ff1aab8-f3d8-11d4-825d-00194b3646c0),
+version(1.0)
+]
+library ProcessManager
+{
+	importlib("stdole32.tlb");
+	importlib("stdole2.tlb");
+
+	interface IProcessMonitor;
+}

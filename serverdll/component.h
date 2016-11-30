@@ -4,7 +4,7 @@
 
 
  /* File created by MIDL compiler version 8.00.0603 */
-/* at Tue Nov 29 23:02:09 2016
+/* at Wed Nov 30 14:29:33 2016
  */
 /* Compiler settings for component.idl:
     Oicf, W1, Zp8, env=Win32 (32b run), target_arch=X86 8.00.0603 
@@ -44,6 +44,13 @@
 #endif
 
 /* Forward Declarations */ 
+
+#ifndef __IProcessMonitor_FWD_DEFINED__
+#define __IProcessMonitor_FWD_DEFINED__
+typedef interface IProcessMonitor IProcessMonitor;
+
+#endif 	/* __IProcessMonitor_FWD_DEFINED__ */
+
 
 #ifndef __IProcessMonitor_FWD_DEFINED__
 #define __IProcessMonitor_FWD_DEFINED__
@@ -209,6 +216,18 @@ EXTERN_C const IID IID_IProcessMonitor;
 
 #endif 	/* __IProcessMonitor_INTERFACE_DEFINED__ */
 
+
+
+#ifndef __ProcessManager_LIBRARY_DEFINED__
+#define __ProcessManager_LIBRARY_DEFINED__
+
+/* library ProcessManager */
+/* [version][uuid] */ 
+
+
+
+EXTERN_C const IID LIBID_ProcessManager;
+#endif /* __ProcessManager_LIBRARY_DEFINED__ */
 
 /* Additional Prototypes for ALL interfaces */
 

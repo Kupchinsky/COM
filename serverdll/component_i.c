@@ -6,7 +6,7 @@
 
 
  /* File created by MIDL compiler version 8.00.0603 */
-/* at Tue Nov 29 23:02:09 2016
+/* at Wed Nov 30 14:29:33 2016
  */
 /* Compiler settings for component.idl:
     Oicf, W1, Zp8, env=Win32 (32b run), target_arch=X86 8.00.0603 
@@ -68,6 +68,9 @@ typedef IID CLSID;
 #endif !_MIDL_USE_GUIDDEF_
 
 MIDL_DEFINE_GUID(IID, IID_IProcessMonitor,0x2044b06d,0xc185,0x4e6e,0xa4,0xc2,0x07,0x8a,0x5b,0x6f,0x9e,0xd6);
+
+
+MIDL_DEFINE_GUID(IID, LIBID_ProcessManager,0x3ff1aab8,0xf3d8,0x11d4,0x82,0x5d,0x00,0x19,0x4b,0x36,0x46,0xc0);
 
 #undef MIDL_DEFINE_GUID
 
