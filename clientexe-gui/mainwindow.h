@@ -4,6 +4,8 @@
 #include <QThread>
 #include <QMainWindow>
 #include <QMap>
+#include <QString>
+#include <QPair>
 #include "../serverdll/component.h"
 
 namespace Ui {
@@ -16,6 +18,7 @@ class Worker : public QObject
 
 private:
     IProcessMonitor *iPM;
+    bool isWorking = true;
 
 public:
     Worker(IProcessMonitor *iPM) {
@@ -27,13 +30,35 @@ public slots:
     void doWork() {
         QMap<unsigned int, QPair<unsigned int, QString>> statuses;
 
-        // TODO: fetch statuses
+        while (isWorking) {
+            Sleep(2000);
+            iPM->updateStatuses();
+
+            unsigned int resultPid;
+            wchar_t *resultPname;
+            unsigned int resultPnamelen;
+            unsigned int resultStatus;
+
+            if (iPM->getChangedStatusFirst(&resultPid, &resultPname, &resultPnamelen, &resultStatus) == S_OK) {
+                QString pnameStr = QString::fromWCharArray(resultPname, resultPnamelen);
+                statuses[resultPid] = QPair<unsigned int, QString>(resultStatus, pnameStr);
+
+                while (iPM->getChangedStatusNext(&resultPid, &resultPname, &resultPnamelen, &resultStatus) == S_OK) {
+                    pnameStr = QString::fromWCharArray(resultPname, resultPnamelen);
+                    statuses[resultPid] = QPair<unsigned int, QString>(resultStatus, pnameStr);
+                }
+            }
+        }
 
         emit resultReady(statuses);
     }
 
     void release() {
         iPM->Release();
+    }
+
+    void stopWork() {
+        isWorking = false;
     }
 
 signals:
@@ -64,12 +89,12 @@ private slots:
 private:
     Ui::MainWindow *ui;
     IProcessMonitor *iPM;
-    QThread *backgroundThread;
+    QThread *backgroundThread = NULL;
 
     void showError();
 
 public slots:
-    void handleResults(QMap<unsigned int, QPair<unsigned int, QString>> statuses); // TODO: impl
+    void handleResults(QMap<unsigned int, QPair<unsigned int, QString>> statuses);
 };
 
 #endif // MAINWINDOW_H

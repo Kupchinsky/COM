@@ -3,6 +3,7 @@
 #include "../clientexe/result_checker.h"
 
 #include <QMessageBox>
+#include <QTime>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -41,9 +42,9 @@ MainWindow::~MainWindow()
 {
     delete ui;
 
-    if (thrd != NULL) {
-        thrd->quit();
-        delete thrd;
+    if (this->backgroundThread != NULL) {
+        this->backgroundThread->quit();
+        delete this->backgroundThread;
     }
 
     iPM->Release();
@@ -149,9 +150,23 @@ void MainWindow::on_checkBox_stateChanged(int arg1)
     ui->pushButton_5->setEnabled(!ui->checkBox->isChecked());
 
     if (ui->checkBox->isChecked()) {
-        // Thread start
+        this->backgroundThread = new QThread();
+        Worker *worker = new Worker(this->iPM);
+        worker->moveToThread(this->backgroundThread);
+
+        // TODO: fix this
+        connect(this, SIGNAL(finished()), worker, SLOT(deleteLater()));
+        connect(this, SIGNAL(finished()), worker, SLOT(stopWork()));
+        connect(this, SIGNAL(started()), worker, SLOT(doWork()));
+        connect(this, SIGNAL(stopped()), worker, SLOT(release()), Qt::DirectConnection);
+        connect(worker, SIGNAL(resultReady(QMap<unsigned int, QPair<unsigned int, QString>>)),
+                this, SLOT(handleResults(QMap<unsigned int, QPair<unsigned int, QString>>)));
+
+        this->backgroundThread->start();
     } else {
-        // Thread stop + join
+        this->backgroundThread->quit();
+        delete this->backgroundThread;
+        this->backgroundThread = NULL;
     }
 }
 
@@ -166,5 +181,25 @@ void MainWindow::on_checkBox_2_stateChanged(int arg1)
 {
     if (ui->checkBox->isChecked()) {
         ui->tableWidget->scrollToBottom();
+    }
+}
+
+void MainWindow::handleResults(QMap<unsigned int, QPair<unsigned int, QString>> statuses) {
+    QMapIterator<unsigned int, QPair<unsigned int, QString>> iterator(statuses);
+
+    QString time = QTime::currentTime().toString(Qt::SystemLocaleLongDate);
+
+    while (iterator.hasNext()) {
+        iterator.next();
+        unsigned int pid = iterator.key();
+        QPair<unsigned int, QString> pair = iterator.value();
+
+        int row = ui->tableWidgetR->rowCount();
+
+        ui->tableWidgetR->insertRow(row);
+        ui->tableWidgetR->setItem(row, 0, new QTableWidgetItem(QString::number(pid)));
+        ui->tableWidgetR->setItem(row, 1, new QTableWidgetItem(pair.second));
+        ui->tableWidgetR->setItem(row, 2, new QTableWidgetItem(QString::number(pair.first)));
+        ui->tableWidgetR->setItem(row, 3, new QTableWidgetItem(time));
     }
 }

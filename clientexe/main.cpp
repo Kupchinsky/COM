@@ -54,7 +54,7 @@ int main(int argc, char **argv)
     thread thrdWaitKey(thrd_waitkey);
     qDebug() << "Monitoring... Press any key to stop";
 
-    while (true) {
+    forever {
         if (isExit) {
             thrdWaitKey.join();
             qDebug() << "[Stopped by user request]";

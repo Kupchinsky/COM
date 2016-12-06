@@ -5,14 +5,33 @@
 #include <QMap>
 #include <QList>
 #include <QPair>
+#include <QMutex>
+#include <QMapIterator>
+#include <QString>
 
 class CProcessMonitorImpl: public IProcessMonitor {
     long lRefCount = 0;
     unsigned int iLastError = 0;
+    QMutex lastErrorLock;
+
     QMap<unsigned int, QString> errors;
+    QMutex errorsLock;
+
     QList<unsigned int> pids;
+    QMutex pidsLock;
+
     QList<QString> pnames;
+    QMutex pnamesLock;
+
     QMap<unsigned int, QPair<unsigned int, QString>> statuses;
+    QMapIterator<unsigned int, QPair<unsigned int, QString>> *statusesIterator = NULL;
+    QMutex statusesLock;
+
+    void setError(unsigned int code) {
+        lastErrorLock.lock();
+        iLastError = code;
+        lastErrorLock.unlock();
+    }
 public:
     HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, void **ppObj);
     ULONG STDMETHODCALLTYPE AddRef();
@@ -35,12 +54,15 @@ public:
     HRESULT STDMETHODCALLTYPE getLastError(unsigned int *code, wchar_t **msg, unsigned int *msglen);
 
     CProcessMonitorImpl() {
+        errorsLock.lock();
         errors[0] = "No error";
         errors[101] = "Process with this pid not found";
         errors[102] = "Process with this pid not registered";
         errors[103] = "This process name pattern isn't registered";
         errors[104] = "Process with same pid already registered";
         errors[105] = "This process name pattern is already registered";
+        errors[106] = "Empty parameter";
+        errorsLock.unlock();
     }
 
     virtual ~CProcessMonitorImpl() {
