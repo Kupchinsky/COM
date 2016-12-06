@@ -51,19 +51,29 @@ HRESULT SERVERDLLSHARED_EXPORT DllRegisterServer() {
     sprintf(szBuff, "%s", "Process Manager");
     sprintf(szDescriptionVal, "%s\\%s", "clsid", szClsid);
 
-    HelperWriteKey(HKEY_CLASSES_ROOT, szDescriptionVal, NULL, REG_SZ, (void*)szBuff, strlen(szBuff));
+    if (HelperWriteKey(HKEY_CLASSES_ROOT, szDescriptionVal, NULL, REG_SZ, (void*)szBuff, strlen(szBuff)) == FALSE) {
+        return 0;
+    }
 
     GetModuleFileNameA(g_hModule, szBuff, sizeof(szBuff));
-    HelperWriteKey(HKEY_CLASSES_ROOT, szInproc, NULL, REG_SZ, (void*)szBuff, strlen(szBuff));
+    if (HelperWriteKey(HKEY_CLASSES_ROOT, szInproc, NULL, REG_SZ, (void*)szBuff, strlen(szBuff)) == FALSE) {
+        return 0;
+    }
 
     strcpy(szBuff, ProgId);
-    HelperWriteKey(HKEY_CLASSES_ROOT, szProgId, NULL, REG_SZ, (void*)szBuff, strlen(szBuff));
+    if (HelperWriteKey(HKEY_CLASSES_ROOT, szProgId, NULL, REG_SZ, (void*)szBuff, strlen(szBuff)) == FALSE) {
+        return 0;
+    }
 
-    sprintf(szBuff, "%s", "Fast Addition Algorithm");
-    HelperWriteKey(HKEY_CLASSES_ROOT, ProgId, NULL, REG_SZ, (void*)szBuff, strlen(szBuff));
+    sprintf(szBuff, "%s", "Process Manager");
+    if (HelperWriteKey(HKEY_CLASSES_ROOT, ProgId, NULL, REG_SZ, (void*)szBuff, strlen(szBuff)) == FALSE) {
+        return 0;
+    }
 
     sprintf(szProgId, "%s\\%s", ProgId, "CLSID");
-    HelperWriteKey(HKEY_CLASSES_ROOT, szProgId, NULL, REG_SZ, (void*)szClsid, strlen(szClsid));
+    if (HelperWriteKey(HKEY_CLASSES_ROOT, szProgId, NULL, REG_SZ, (void*)szClsid, strlen(szClsid)) == FALSE) {
+        return 0;
+    }
 
     return 1;
 }
