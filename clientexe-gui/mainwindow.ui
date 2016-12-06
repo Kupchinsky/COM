@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>591</width>
-    <height>623</height>
+    <height>622</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -102,7 +102,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>Process name</string>
+     <string>Name pattern</string>
     </property>
    </widget>
    <widget class="QPushButton" name="pushButton_5">
@@ -123,12 +123,12 @@
      <rect>
       <x>10</x>
       <y>540</y>
-      <width>171</width>
+      <width>231</width>
       <height>19</height>
      </rect>
     </property>
     <property name="text">
-     <string>Auto update every 2 seconds</string>
+     <string>Auto update every 2 seconds (Threaded)</string>
     </property>
    </widget>
    <widget class="QTableWidget" name="tableWidget">
@@ -149,6 +149,25 @@
       <width>256</width>
       <height>192</height>
      </rect>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="checkBox_2">
+    <property name="geometry">
+     <rect>
+      <x>250</x>
+      <y>540</y>
+      <width>231</width>
+      <height>19</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Auto scroll log</string>
+    </property>
+    <property name="checked">
+     <bool>true</bool>
+    </property>
+    <property name="tristate">
+     <bool>false</bool>
     </property>
    </widget>
   </widget>

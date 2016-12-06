@@ -41,6 +41,11 @@ MainWindow::~MainWindow()
 {
     delete ui;
 
+    if (thrd != NULL) {
+        thrd->quit();
+        delete thrd;
+    }
+
     iPM->Release();
     CoUninitialize();
 }
@@ -52,7 +57,7 @@ void MainWindow::on_pushButton_2_clicked()
         uint pid = ui->lineEdit->text().toUInt();
 
         if (iPM->registerProcessByPid(pid) != S_OK) {
-            QMessageBox::warning(ui->centralWidget, "Error", "Something went wrong", QMessageBox::Ok, QMessageBox::Cancel);
+            this->showError();
         } else {
             int row = ui->tableWidgetR->rowCount();
 
@@ -66,13 +71,13 @@ void MainWindow::on_pushButton_2_clicked()
         QString pName = ui->lineEdit->text();
 
         if (iPM->registerProcessByName((wchar_t*) pName.toStdWString().c_str()) != S_OK) {
-            QMessageBox::warning(ui->centralWidget, "Error", "Something went wrong", QMessageBox::Ok, QMessageBox::Cancel);
+            this->showError();
         } else {
             int row = ui->tableWidgetR->rowCount();
 
             ui->tableWidgetR->insertRow(row);
             ui->tableWidgetR->setItem(row, 0, new QTableWidgetItem(pName));
-            ui->tableWidgetR->setItem(row, 1, new QTableWidgetItem("Process name"));
+            ui->tableWidgetR->setItem(row, 1, new QTableWidgetItem("Name pattern"));
 
             ui->lineEdit->clear();
         }
@@ -82,7 +87,7 @@ void MainWindow::on_pushButton_2_clicked()
 void MainWindow::on_pushButton_3_clicked()
 {
     if (iPM->unregisterAllProcesses() != S_OK) {
-        QMessageBox::warning(ui->centralWidget, "Error", "Something went wrong", QMessageBox::Ok, QMessageBox::Cancel);
+        this->showError();
     } else {
         ui->tableWidgetR->setRowCount(0);
     }
@@ -111,10 +116,55 @@ void MainWindow::on_pushButton_4_clicked()
             }
 
             if (result != S_OK) {
-                QMessageBox::warning(ui->centralWidget, "Error", "Something went wrong", QMessageBox::Ok, QMessageBox::Cancel);
+                this->showError();
             } else {
                 ui->tableWidgetR->removeRow(row);
             }
+
+            return;
         }
+    }
+
+    QMessageBox::warning(ui->centralWidget, "Error", "No selection!",
+                         QMessageBox::Ok, QMessageBox::NoButton);
+}
+
+void MainWindow::showError() {
+    wchar_t *errorMsg;
+    unsigned int errorMsgLen;
+    QString result;
+
+    if (iPM->getLastError(NULL, &errorMsg, &errorMsgLen) == S_OK) {
+        result = QString::fromWCharArray(errorMsg, errorMsgLen);
+    } else {
+        result = "[getLastError invalid result]";
+    }
+
+    QMessageBox::warning(ui->centralWidget, "Error", "Component error: " + result,
+                         QMessageBox::Ok, QMessageBox::NoButton);
+}
+
+void MainWindow::on_checkBox_stateChanged(int arg1)
+{
+    ui->pushButton_5->setEnabled(!ui->checkBox->isChecked());
+
+    if (ui->checkBox->isChecked()) {
+        // Thread start
+    } else {
+        // Thread stop + join
+    }
+}
+
+void MainWindow::on_pushButton_5_clicked()
+{
+    if (iPM->updateStatuses() != S_OK) {
+        this->showError();
+    }
+}
+
+void MainWindow::on_checkBox_2_stateChanged(int arg1)
+{
+    if (ui->checkBox->isChecked()) {
+        ui->tableWidget->scrollToBottom();
     }
 }

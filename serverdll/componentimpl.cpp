@@ -40,7 +40,8 @@ HRESULT STDMETHODCALLTYPE CProcessMonitorImpl::registerProcessByName(wchar_t *na
 }
 
 HRESULT STDMETHODCALLTYPE CProcessMonitorImpl::registerProcessByPid(unsigned int pid) {
-    return S_OK;
+    this->iLastError = 101;
+    return S_FALSE;
 }
 
 HRESULT STDMETHODCALLTYPE CProcessMonitorImpl::unregisterProcessByName(wchar_t *name) {

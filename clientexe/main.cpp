@@ -45,7 +45,7 @@ int main(int argc, char **argv)
             wchar_t *errorMsg;
             unsigned int errorMsgLen;
 
-            if (iPM->getLastError(NULL, &errorMsg, &errorMsgLen)) {
+            if (iPM->getLastError(NULL, &errorMsg, &errorMsgLen) == S_OK) {
                 qDebug() << "Registering failed!" << QString::fromWCharArray(errorMsg, errorMsgLen);
             }
         }
