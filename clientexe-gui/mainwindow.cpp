@@ -130,7 +130,9 @@ void MainWindow::on_pushButton_4_clicked()
                          QMessageBox::Ok, QMessageBox::NoButton);
 }
 
-void MainWindow::showError() {
+void MainWindow::showErrorMessage(QWidget *parent, IProcessMonitor *iPM) {
+    iPM->AddRef();
+
     wchar_t *errorMsg;
     unsigned int errorMsgLen;
     QString result;
@@ -141,8 +143,14 @@ void MainWindow::showError() {
         result = "[getLastError invalid result]";
     }
 
-    QMessageBox::warning(ui->centralWidget, "Error", "Component error: " + result,
+    QMessageBox::warning(parent, "Error", "Component error: " + result,
                          QMessageBox::Ok, QMessageBox::NoButton);
+
+    iPM->Release();
+}
+
+void MainWindow::showError() {
+    MainWindow::showErrorMessage(ui->centralWidget, this->iPM);
 }
 
 void MainWindow::on_checkBox_stateChanged(int arg1)
@@ -179,7 +187,7 @@ void MainWindow::on_pushButton_5_clicked()
 
 void MainWindow::on_checkBox_2_stateChanged(int arg1)
 {
-    if (ui->checkBox->isChecked()) {
+    if (ui->checkBox_2->isChecked()) {
         ui->tableWidget->scrollToBottom();
     }
 }
@@ -201,5 +209,9 @@ void MainWindow::handleResults(QMap<unsigned int, QPair<unsigned int, QString>> 
         ui->tableWidgetR->setItem(row, 1, new QTableWidgetItem(pair.second));
         ui->tableWidgetR->setItem(row, 2, new QTableWidgetItem(QString::number(pair.first)));
         ui->tableWidgetR->setItem(row, 3, new QTableWidgetItem(time));
+    }
+
+    if (ui->checkBox_2->isChecked()) {
+        ui->tableWidget->scrollToBottom();
     }
 }

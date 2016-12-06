@@ -12,6 +12,40 @@ namespace Ui {
 class MainWindow;
 }
 
+class MainWindow : public QMainWindow
+{
+    Q_OBJECT
+
+public:
+    static void showErrorMessage(QWidget *parent, IProcessMonitor *iPM);
+
+    explicit MainWindow(QWidget *parent = 0);
+    ~MainWindow();
+
+private slots:
+    void on_pushButton_2_clicked();
+
+    void on_pushButton_3_clicked();
+
+    void on_pushButton_4_clicked();
+
+    void on_pushButton_5_clicked();
+
+    void on_checkBox_stateChanged(int arg1);
+
+    void on_checkBox_2_stateChanged(int arg1);
+
+private:
+    Ui::MainWindow *ui;
+    IProcessMonitor *iPM;
+    QThread *backgroundThread = NULL;
+
+    void showError();
+
+public slots:
+    void handleResults(QMap<unsigned int, QPair<unsigned int, QString>> statuses);
+};
+
 class Worker : public QObject
 {
     Q_OBJECT
@@ -32,7 +66,11 @@ public slots:
 
         while (isWorking) {
             Sleep(2000);
-            iPM->updateStatuses();
+
+            if (iPM->updateStatuses() != S_OK) {
+                MainWindow::showErrorMessage(NULL, this->iPM);
+                continue;
+            }
 
             unsigned int resultPid;
             wchar_t *resultPname;
@@ -64,37 +102,4 @@ public slots:
 signals:
     void resultReady(QMap<unsigned int, QPair<unsigned int, QString>> statuses);
 };
-
-class MainWindow : public QMainWindow
-{
-    Q_OBJECT
-
-public:
-    explicit MainWindow(QWidget *parent = 0);
-    ~MainWindow();
-
-private slots:
-    void on_pushButton_2_clicked();
-
-    void on_pushButton_3_clicked();
-
-    void on_pushButton_4_clicked();
-
-    void on_pushButton_5_clicked();
-
-    void on_checkBox_stateChanged(int arg1);
-
-    void on_checkBox_2_stateChanged(int arg1);
-
-private:
-    Ui::MainWindow *ui;
-    IProcessMonitor *iPM;
-    QThread *backgroundThread = NULL;
-
-    void showError();
-
-public slots:
-    void handleResults(QMap<unsigned int, QPair<unsigned int, QString>> statuses);
-};
-
 #endif // MAINWINDOW_H
