@@ -80,13 +80,7 @@ HRESULT STDMETHODCALLTYPE CProcessMonitorImpl::getLastError(unsigned int *code, 
     }
 
     if (msg != NULL) {
-        QString qmsg;
-
-        switch (this->iLastError) {
-            case 0:
-                qmsg = "No error";
-                break;
-        }
+        QString qmsg = this->errors.value(this->iLastError, "Unknown error");
 
         *msg = new wchar_t[qmsg.size()];
         *msglen = qmsg.toWCharArray(*msg);

@@ -17,7 +17,7 @@ void thrd_waitkey() {
     isExit = true;
 }
 
-void print_status(unsigned int pid, unsigned int status) {
+void print_status(unsigned int pid, QString pname, unsigned int status) {
     qDebug() << "";
 }
 
@@ -37,12 +37,17 @@ int main(int argc, char **argv)
     processes.push_back("pageant.exe");
 
     foreach (QString processName, processes) {
-        qDebug() << "Registering " << processName << " [by name]";
+        qDebug() << "Registering " << processName << " [by name pattern]";
 
         wchar_t *str = (wchar_t*) processName.toStdWString().c_str();
 
         if (iPM->registerProcessByName(str) != S_OK) {
-            qDebug() << "Registering failed!";
+            wchar_t *errorMsg;
+            unsigned int errorMsgLen;
+
+            if (iPM->getLastError(NULL, &errorMsg, &errorMsgLen)) {
+                qDebug() << "Registering failed!" << QString::fromWCharArray(errorMsg, errorMsgLen);
+            }
         }
     }
 
@@ -71,9 +76,11 @@ int main(int argc, char **argv)
             qDebug() << time << "Changed statuses:";
             qDebug() << "============================";
 
-            print_status(resultPid, resultStatus);
+            print_status(resultPid, QString::fromWCharArray(resultPname, resultPnamelen),
+                         resultStatus);
             while (iPM->getChangedStatusNext(&resultPid, &resultPname, &resultPnamelen, &resultStatus) == S_OK) {
-                print_status(resultPid, resultStatus);
+                print_status(resultPid, QString::fromWCharArray(resultPname, resultPnamelen),
+                             resultStatus);
             }
 
             qDebug() << "============================";
