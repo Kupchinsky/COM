@@ -10,10 +10,9 @@ CONFIG -= app_bundle
 TEMPLATE = app
 
 SOURCES += main.cpp \
-    test_nomanager.cpp \
-    test_manager.cpp
+    ../serverdll/component_i.c
 
 HEADERS += \
-    test_nomanager.h \
-    result_checker.h \
-    test_manager.h
+    result_checker.h
+
+LIBS += -luuid -loleaut32 -lole32

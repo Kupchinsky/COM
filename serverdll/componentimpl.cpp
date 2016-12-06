@@ -33,7 +33,7 @@ ULONG STDMETHODCALLTYPE CProcessMonitorImpl::Release() {
     return nRefCount;
 }
 
-HRESULT STDMETHODCALLTYPE CProcessMonitorImpl::registerProcessByName(BSTR name) {
+HRESULT STDMETHODCALLTYPE CProcessMonitorImpl::registerProcessByName(wchar_t *name) {
     return S_OK;
 }
 
@@ -41,7 +41,7 @@ HRESULT STDMETHODCALLTYPE CProcessMonitorImpl::registerProcessByPid(unsigned int
     return S_OK;
 }
 
-HRESULT STDMETHODCALLTYPE CProcessMonitorImpl::unregisterProcessByName(BSTR name) {
+HRESULT STDMETHODCALLTYPE CProcessMonitorImpl::unregisterProcessByName(wchar_t *name) {
     return S_OK;
 }
 
@@ -57,10 +57,16 @@ HRESULT STDMETHODCALLTYPE CProcessMonitorImpl::updateStatuses(void) {
     return S_OK;
 }
 
-HRESULT STDMETHODCALLTYPE CProcessMonitorImpl::getChangedStatusFirst(unsigned int *pid, unsigned int *status) {
-    return S_OK;
+HRESULT STDMETHODCALLTYPE CProcessMonitorImpl::getChangedStatusFirst(unsigned int *pid,
+                                                                     wchar_t **pname,
+                                                                     unsigned int *pnamelen,
+                                                                     unsigned int *status) {
+    return S_FALSE;
 }
 
-HRESULT STDMETHODCALLTYPE CProcessMonitorImpl::getChangedStatusNext(unsigned int *pid, unsigned int *status) {
-    return S_OK;
+HRESULT STDMETHODCALLTYPE CProcessMonitorImpl::getChangedStatusNext(unsigned int *pid,
+                                                                    wchar_t **pname,
+                                                                    unsigned int *pnamelen,
+                                                                    unsigned int *status) {
+    return S_FALSE;
 }

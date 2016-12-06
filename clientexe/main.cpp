@@ -1,72 +1,89 @@
 #include <QDebug>
 #include <QException>
+#include <QTime>
 #include <windows.h>
 #include <cassert>
+#include <thread>
 
-#include "../pseudo_definitions.h"
-#include "test_nomanager.h"
-#include "test_manager.h"
+#include "../serverdll/component.h"
 #include "result_checker.h"
+
+using namespace std;
+
+bool isExit = false;
+
+void thrd_waitkey() {
+    getchar();
+    isExit = true;
+}
+
+void print_status(unsigned int pid, unsigned int status) {
+    qDebug() << "";
+}
 
 int main(int argc, char **argv)
 {
-    // Args: serverdll, managerdll
-    if (argc < 3) {
-        qDebug() << "No args!";
-        return 1;
+    CoInitialize(NULL);
+
+    IProcessMonitor *iPM;
+    ResultChecker::check(CoCreateInstance(LIBID_ProcessManager, NULL, CLSCTX_INPROC_SERVER,
+                                          IID_IProcessMonitor, (void**) &iPM));
+
+    qDebug() << "Registering...";
+
+    QVector<QString> processes;
+    processes.push_back("explorer.exe");
+    processes.push_back("Skype.exe");
+    processes.push_back("pageant.exe");
+
+    foreach (QString processName, processes) {
+        qDebug() << "Registering " << processName << " [by name]";
+
+        wchar_t *str = (wchar_t*) processName.toStdWString().c_str();
+
+        if (iPM->registerProcessByName(str) != S_OK) {
+            qDebug() << "Registering failed! Maybe process not found";
+        }
     }
 
-    qDebug() << "Exception test";
-    try {
-        ResultChecker::check(_E_INVALIDARG);
-        qDebug() << "Test failed. Exception not throwed, fail!";
-    } catch (InvalidResultException& e) {
-        qDebug() << "Test passed. Exception throwed: " << e.what();
+    thread thrdWaitKey(thrd_waitkey);
+    qDebug() << "Monitoring... Press any key to stop";
+
+    while (true) {
+        if (isExit) {
+            thrdWaitKey.join();
+            qDebug() << "[Stopped by user request]";
+            break;
+        }
+
+        Sleep(2000L);
+
+        iPM->updateStatuses();
+
+        unsigned int resultPid;
+        wchar_t *resultPname;
+        unsigned int resultPnamelen;
+        unsigned int resultStatus;
+
+        QString time = QTime::currentTime().toString(Qt::SystemLocaleLongDate);
+
+        if (iPM->getChangedStatusFirst(&resultPid, &resultPname, &resultPnamelen, &resultStatus) == S_OK) {
+            qDebug() << time << "Changed statuses:";
+            qDebug() << "============================";
+
+            print_status(resultPid, resultStatus);
+            while (iPM->getChangedStatusNext(&resultPid, &resultPname, &resultPnamelen, &resultStatus) == S_OK) {
+                print_status(resultPid, resultStatus);
+            }
+
+            qDebug() << "============================";
+        } else {
+            qDebug() << time << "No statuses changed at this time";
+        }
     }
 
-    qDebug() << "Testing no-manager work...";
-    qDebug() << "Loading " << argv[1];
+    ResultChecker::check(iPM->Release());
 
-    HMODULE hModule = LoadLibraryA(argv[1]);
-    assert(hModule != NULL);
-
-    bool bError = false;
-
-    try {
-        CTestNoManager::run(hModule);
-    } catch (InvalidResultException& e) {
-        qDebug() << "Test failed. Exception throwed: " << e.what();
-        bError = true;
-    }
-
-    FreeLibrary(hModule);
-
-    if (!bError) {
-        qDebug() << "Test passed.";
-    } else {
-        return 1;
-    }
-
-    qDebug() << "Testing manager work...";
-    qDebug() << "Loading " << argv[2];
-
-    hModule = LoadLibraryA(argv[2]);
-    assert(hModule != NULL);
-
-    try {
-        CTestManager::run(hModule);
-    } catch (InvalidResultException& e) {
-        qDebug() << "Test failed. Exception throwed: " << e.what();
-        bError = true;
-    }
-
-    FreeLibrary(hModule);
-
-    if (!bError) {
-        qDebug() << "Test passed.";
-    } else {
-        return 1;
-    }
-
+    CoUninitialize();
     return 0;
 }

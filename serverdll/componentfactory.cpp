@@ -35,11 +35,11 @@ ULONG STDMETHODCALLTYPE CProcessMonitorImplFactory::Release() {
 
 HRESULT STDMETHODCALLTYPE CProcessMonitorImplFactory::CreateInstance(IUnknown* pUnknownOuter, const IID& iid, void** ppv) {
     if (pUnknownOuter != NULL) {
-        return CLASS_E_NOAGGREGATION ;
+        return CLASS_E_NOAGGREGATION;
     }
 
     CProcessMonitorImpl *impl = new CProcessMonitorImpl();
-    return impl->QueryInterface(iid, ppv) ;
+    return impl->QueryInterface(iid, ppv);
 }
 
 HRESULT STDMETHODCALLTYPE CProcessMonitorImplFactory::LockServer(BOOL bLock) {

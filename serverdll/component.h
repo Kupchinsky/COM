@@ -4,7 +4,7 @@
 
 
  /* File created by MIDL compiler version 8.00.0603 */
-/* at Wed Nov 30 14:29:33 2016
+/* at Tue Dec 06 23:17:31 2016
  */
 /* Compiler settings for component.idl:
     Oicf, W1, Zp8, env=Win32 (32b run), target_arch=X86 8.00.0603 
@@ -16,7 +16,7 @@
 */
 /* @@MIDL_FILE_HEADING(  ) */
 
-// #pragma warning( disable: 4049 )  /* more than 64k source lines */
+#pragma warning( disable: 4049 )  /* more than 64k source lines */
 
 
 /* verify that the <rpcndr.h> version is high enough to compile this file*/
@@ -83,13 +83,13 @@ EXTERN_C const IID IID_IProcessMonitor;
     {
     public:
         virtual /* [id] */ HRESULT STDMETHODCALLTYPE registerProcessByName( 
-            BSTR name) = 0;
+            wchar_t *name) = 0;
         
         virtual /* [id] */ HRESULT STDMETHODCALLTYPE registerProcessByPid( 
             unsigned int pid) = 0;
         
         virtual /* [id] */ HRESULT STDMETHODCALLTYPE unregisterProcessByName( 
-            BSTR name) = 0;
+            wchar_t *name) = 0;
         
         virtual /* [id] */ HRESULT STDMETHODCALLTYPE unregisterProcessByPid( 
             unsigned int pid) = 0;
@@ -100,11 +100,15 @@ EXTERN_C const IID IID_IProcessMonitor;
         
         virtual /* [id] */ HRESULT STDMETHODCALLTYPE getChangedStatusFirst( 
             /* [out] */ unsigned int *pid,
-            /* [retval][out] */ unsigned int *status) = 0;
+            /* [size_is][size_is][out] */ wchar_t **pname,
+            /* [out] */ unsigned int *pnamelen,
+            /* [out] */ unsigned int *status) = 0;
         
         virtual /* [id] */ HRESULT STDMETHODCALLTYPE getChangedStatusNext( 
             /* [out] */ unsigned int *pid,
-            /* [retval][out] */ unsigned int *status) = 0;
+            /* [size_is][size_is][out] */ wchar_t **pname,
+            /* [out] */ unsigned int *pnamelen,
+            /* [out] */ unsigned int *status) = 0;
         
     };
     
@@ -129,7 +133,7 @@ EXTERN_C const IID IID_IProcessMonitor;
         
         /* [id] */ HRESULT ( STDMETHODCALLTYPE *registerProcessByName )( 
             IProcessMonitor * This,
-            BSTR name);
+            wchar_t *name);
         
         /* [id] */ HRESULT ( STDMETHODCALLTYPE *registerProcessByPid )( 
             IProcessMonitor * This,
@@ -137,7 +141,7 @@ EXTERN_C const IID IID_IProcessMonitor;
         
         /* [id] */ HRESULT ( STDMETHODCALLTYPE *unregisterProcessByName )( 
             IProcessMonitor * This,
-            BSTR name);
+            wchar_t *name);
         
         /* [id] */ HRESULT ( STDMETHODCALLTYPE *unregisterProcessByPid )( 
             IProcessMonitor * This,
@@ -152,12 +156,16 @@ EXTERN_C const IID IID_IProcessMonitor;
         /* [id] */ HRESULT ( STDMETHODCALLTYPE *getChangedStatusFirst )( 
             IProcessMonitor * This,
             /* [out] */ unsigned int *pid,
-            /* [retval][out] */ unsigned int *status);
+            /* [size_is][size_is][out] */ wchar_t **pname,
+            /* [out] */ unsigned int *pnamelen,
+            /* [out] */ unsigned int *status);
         
         /* [id] */ HRESULT ( STDMETHODCALLTYPE *getChangedStatusNext )( 
             IProcessMonitor * This,
             /* [out] */ unsigned int *pid,
-            /* [retval][out] */ unsigned int *status);
+            /* [size_is][size_is][out] */ wchar_t **pname,
+            /* [out] */ unsigned int *pnamelen,
+            /* [out] */ unsigned int *status);
         
         END_INTERFACE
     } IProcessMonitorVtbl;
@@ -200,11 +208,11 @@ EXTERN_C const IID IID_IProcessMonitor;
 #define IProcessMonitor_updateStatuses(This)	\
     ( (This)->lpVtbl -> updateStatuses(This) ) 
 
-#define IProcessMonitor_getChangedStatusFirst(This,pid,status)	\
-    ( (This)->lpVtbl -> getChangedStatusFirst(This,pid,status) ) 
+#define IProcessMonitor_getChangedStatusFirst(This,pid,pname,pnamelen,status)	\
+    ( (This)->lpVtbl -> getChangedStatusFirst(This,pid,pname,pnamelen,status) ) 
 
-#define IProcessMonitor_getChangedStatusNext(This,pid,status)	\
-    ( (This)->lpVtbl -> getChangedStatusNext(This,pid,status) ) 
+#define IProcessMonitor_getChangedStatusNext(This,pid,pname,pnamelen,status)	\
+    ( (This)->lpVtbl -> getChangedStatusNext(This,pid,pname,pnamelen,status) ) 
 
 #endif /* COBJMACROS */
 
@@ -230,11 +238,6 @@ EXTERN_C const IID LIBID_ProcessManager;
 #endif /* __ProcessManager_LIBRARY_DEFINED__ */
 
 /* Additional Prototypes for ALL interfaces */
-
-unsigned long             __RPC_USER  BSTR_UserSize(     unsigned long *, unsigned long            , BSTR * ); 
-unsigned char * __RPC_USER  BSTR_UserMarshal(  unsigned long *, unsigned char *, BSTR * ); 
-unsigned char * __RPC_USER  BSTR_UserUnmarshal(unsigned long *, unsigned char *, BSTR * ); 
-void                      __RPC_USER  BSTR_UserFree(     unsigned long *, BSTR * ); 
 
 /* end of Additional Prototypes */
 

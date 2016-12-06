@@ -2,25 +2,24 @@
 #define RESULT_CHECKER_H
 
 #include <QDebug>
-#include <QException>
-#include "../unknown.h"
+#include <windows.h>
 
-class InvalidResultException: public QException {
-    _HRESULT result;
+class InvalidResultException: public std::exception {
+    HRESULT result;
 public:
-    InvalidResultException(_HRESULT result) {
+    InvalidResultException(HRESULT result) {
         this->result = result;
     }
 
-    QString what() {
-        return QString("Not successfull result: ") + QString::number(result);
+    virtual const char* what() const throw() {
+        return (QString("Not successfull result: ") + QString::number(result)).toStdString().c_str();
     }
 };
 
 class ResultChecker {
 public:
-    static void check(_HRESULT result) {
-        if (result != _S_OK) {
+    static void check(HRESULT result) {
+        if (result != S_OK) {
             throw InvalidResultException(result);
         }
     }

@@ -6,17 +6,24 @@ version(1.0)
 ]
 interface IProcessMonitor: IUnknown
 {
-    [id(1)] HRESULT registerProcessByName(BSTR name);
+    [id(1)] HRESULT registerProcessByName(wchar_t *name);
     [id(2)] HRESULT registerProcessByPid(unsigned int pid);
 
-    [id(3)] HRESULT unregisterProcessByName(BSTR name);
+    [id(3)] HRESULT unregisterProcessByName(wchar_t *name);
     [id(4)] HRESULT unregisterProcessByPid(unsigned int pid);
     [id(5)] HRESULT unregisterAllProcesses();
 
     [id(6)] HRESULT updateStatuses();
 
-    [id(7)] HRESULT getChangedStatusFirst([out] unsigned int *pid, [out, retval] unsigned int *status);
-    [id(8)] HRESULT getChangedStatusNext([out] unsigned int *pid, [out, retval] unsigned int *status);
+    [id(7)] HRESULT getChangedStatusFirst(	[out] unsigned int *pid,
+											[out, size_is(, *pnamelen)] wchar_t **pname,
+											[out] unsigned int *pnamelen,
+											[out] unsigned int *status);
+
+	[id(8)] HRESULT getChangedStatusNext(	[out] unsigned int *pid,
+											[out, size_is(, *pnamelen)] wchar_t **pname,
+											[out] unsigned int *pnamelen,
+											[out] unsigned int *status);
 }
 
 [
