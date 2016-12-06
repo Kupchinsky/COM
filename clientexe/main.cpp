@@ -42,7 +42,7 @@ int main(int argc, char **argv)
         wchar_t *str = (wchar_t*) processName.toStdWString().c_str();
 
         if (iPM->registerProcessByName(str) != S_OK) {
-            qDebug() << "Registering failed! Maybe process not found";
+            qDebug() << "Registering failed!";
         }
     }
 

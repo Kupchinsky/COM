@@ -5,6 +5,7 @@
 
 class CProcessMonitorImpl: public IProcessMonitor {
     long lRefCount = 0;
+    unsigned int iLastError = 0;
 public:
     HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, void **ppObj);
     ULONG STDMETHODCALLTYPE AddRef();
@@ -23,6 +24,8 @@ public:
                                                     unsigned int *pnamelen, unsigned int *status);
     HRESULT STDMETHODCALLTYPE getChangedStatusNext(unsigned int *pid, wchar_t **pname,
                                                    unsigned int *pnamelen, unsigned int *status);
+
+    HRESULT STDMETHODCALLTYPE getLastError(unsigned int *code, wchar_t **msg, unsigned int *msglen);
 
     virtual ~CProcessMonitorImpl() {
     }

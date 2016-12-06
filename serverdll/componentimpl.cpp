@@ -1,6 +1,8 @@
 #include "componentimpl.h"
 #include "serverdll.h"
 
+#include <QString>
+
 HRESULT STDMETHODCALLTYPE CProcessMonitorImpl::QueryInterface(REFIID riid, void **ppvObject) {    
     if (riid == IID_IUnknown) {
         *ppvObject = static_cast<IUnknown*>(this);
@@ -69,4 +71,26 @@ HRESULT STDMETHODCALLTYPE CProcessMonitorImpl::getChangedStatusNext(unsigned int
                                                                     unsigned int *pnamelen,
                                                                     unsigned int *status) {
     return S_FALSE;
+}
+
+HRESULT STDMETHODCALLTYPE CProcessMonitorImpl::getLastError(unsigned int *code, wchar_t **msg,
+                                                            unsigned int *msglen) {
+    if (code != NULL) {
+        *code = this->iLastError;
+    }
+
+    if (msg != NULL) {
+        QString qmsg;
+
+        switch (this->iLastError) {
+            case 0:
+                qmsg = "No error";
+                break;
+        }
+
+        *msg = new wchar_t[qmsg.size()];
+        *msglen = qmsg.toWCharArray(*msg);
+    }
+
+    return S_OK;
 }

@@ -24,6 +24,8 @@ interface IProcessMonitor: IUnknown
 											[out, size_is(, *pnamelen)] wchar_t **pname,
 											[out] unsigned int *pnamelen,
 											[out] unsigned int *status);
+
+    [id(9)] HRESULT getLastError([out] unsigned int *code, [out, size_is(, *msglen)] wchar_t **msg, [out] unsigned int *msglen);
 }
 
 [

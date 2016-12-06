@@ -4,7 +4,7 @@
 
 
  /* File created by MIDL compiler version 8.00.0603 */
-/* at Tue Dec 06 23:17:31 2016
+/* at Tue Dec 06 23:31:05 2016
  */
 /* Compiler settings for component.idl:
     Oicf, W1, Zp8, env=Win32 (32b run), target_arch=X86 8.00.0603 
@@ -110,6 +110,11 @@ EXTERN_C const IID IID_IProcessMonitor;
             /* [out] */ unsigned int *pnamelen,
             /* [out] */ unsigned int *status) = 0;
         
+        virtual /* [id] */ HRESULT STDMETHODCALLTYPE getLastError( 
+            /* [out] */ unsigned int *code,
+            /* [size_is][size_is][out] */ wchar_t **msg,
+            /* [out] */ unsigned int *msglen) = 0;
+        
     };
     
     
@@ -167,6 +172,12 @@ EXTERN_C const IID IID_IProcessMonitor;
             /* [out] */ unsigned int *pnamelen,
             /* [out] */ unsigned int *status);
         
+        /* [id] */ HRESULT ( STDMETHODCALLTYPE *getLastError )( 
+            IProcessMonitor * This,
+            /* [out] */ unsigned int *code,
+            /* [size_is][size_is][out] */ wchar_t **msg,
+            /* [out] */ unsigned int *msglen);
+        
         END_INTERFACE
     } IProcessMonitorVtbl;
 
@@ -213,6 +224,9 @@ EXTERN_C const IID IID_IProcessMonitor;
 
 #define IProcessMonitor_getChangedStatusNext(This,pid,pname,pnamelen,status)	\
     ( (This)->lpVtbl -> getChangedStatusNext(This,pid,pname,pnamelen,status) ) 
+
+#define IProcessMonitor_getLastError(This,code,msg,msglen)	\
+    ( (This)->lpVtbl -> getLastError(This,code,msg,msglen) ) 
 
 #endif /* COBJMACROS */
 
