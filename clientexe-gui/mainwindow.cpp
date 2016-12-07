@@ -36,6 +36,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->tableWidgetR->verticalHeader()->setVisible(false);
     ui->tableWidgetR->setSelectionBehavior(QAbstractItemView::SelectRows);
     ui->tableWidgetR->setSelectionMode(QAbstractItemView::SingleSelection);
+
+    qRegisterMetaType<QMap<uint,QPair<uint,QString> >>("QMap<uint,QPair<uint,QString> >");
 }
 
 MainWindow::~MainWindow()
@@ -162,18 +164,17 @@ void MainWindow::on_checkBox_stateChanged(int arg1)
         Worker *worker = new Worker(this->iPM);
         worker->moveToThread(this->backgroundThread);
 
-        // TODO: fix this
-        connect(this, SIGNAL(finished()), worker, SLOT(deleteLater()));
-        connect(this, SIGNAL(finished()), worker, SLOT(stopWork()));
-        connect(this, SIGNAL(started()), worker, SLOT(doWork()));
-        connect(this, SIGNAL(stopped()), worker, SLOT(release()), Qt::DirectConnection);
+        ui->centralWidget->setAttribute(Qt::WA_DeleteOnClose);
+        connect(ui->centralWidget, SIGNAL(destroyed(QObject*)), this->backgroundThread, SLOT(deleteLater()));
+        connect(this->backgroundThread, SIGNAL(finished()), worker, SLOT(deleteLater()));
+        connect(this, SIGNAL(stopBackgroundWork()), worker, SLOT(stopWork()));
+        connect(this->backgroundThread, SIGNAL(started()), worker, SLOT(doWork()));
         connect(worker, SIGNAL(resultReady(QMap<unsigned int, QPair<unsigned int, QString>>)),
                 this, SLOT(handleResults(QMap<unsigned int, QPair<unsigned int, QString>>)));
 
         this->backgroundThread->start();
     } else {
-        this->backgroundThread->quit();
-        delete this->backgroundThread;
+        emit stopBackgroundWork();
         this->backgroundThread = NULL;
     }
 }

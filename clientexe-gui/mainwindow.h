@@ -46,6 +46,9 @@ private:
 
 public slots:
     void handleResults(QMap<unsigned int, QPair<unsigned int, QString>> statuses);
+
+signals:
+    void stopBackgroundWork();
 };
 
 class Worker : public QObject
@@ -69,9 +72,13 @@ public slots:
         while (isWorking) {
             Sleep(2000);
 
-            if (iPM->updateStatuses() != S_OK) {
+            iPM->updateStatuses();
+
+            unsigned int code;
+            iPM->getLastError(&code, NULL, NULL);
+
+            if (code != 0) {
                 MainWindow::showErrorMessage(NULL, this->iPM);
-                continue;
             }
 
             statuses.clear();
@@ -90,12 +97,10 @@ public slots:
                     statuses[resultPid] = QPair<unsigned int, QString>(resultStatus, pnameStr);
                 }
             }
+
+            emit resultReady(statuses);
         }
 
-        emit resultReady(statuses);
-    }
-
-    void release() {
         iPM->Release();
     }
 
