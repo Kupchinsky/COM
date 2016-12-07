@@ -84,12 +84,6 @@ HRESULT STDMETHODCALLTYPE CProcessMonitorImpl::registerProcessByPid(unsigned int
             setError(101, getLastErrorMsg());
             result = S_FALSE;
         } else {
-            pids.push_back(pid);
-
-            phandlesLock.lock();
-            phandles.insert(pid, hProcess);
-            phandlesLock.unlock();
-
             ppidnamesLock.lock();
             wchar_t *pname = new wchar_t[MAX_PATH];
             long pnameLen;
@@ -98,6 +92,17 @@ HRESULT STDMETHODCALLTYPE CProcessMonitorImpl::registerProcessByPid(unsigned int
                 QString ppathStr = QString::fromWCharArray(pname, pnameLen);
                 QFileInfo fileInfo(ppathStr);
                 ppidnames.insert(pid, fileInfo.fileName());
+
+                pids.push_back(pid);
+
+                phandlesLock.lock();
+                phandles.insert(pid, hProcess);
+                phandlesLock.unlock();
+            } else {
+                setError(107, "GetProcessImageFileNameW fails with " + getLastErrorMsg());
+                result = S_FALSE;
+
+                CloseHandle(hProcess);
             }
 
             delete[] pname;
@@ -239,6 +244,8 @@ HRESULT STDMETHODCALLTYPE CProcessMonitorImpl::updateStatuses(void) {
         statusesIterator = NULL;
     }
 
+    QString errMsg;
+
     // Check newly created processes
     if (pnames.size() != 0) {
         PROCESSENTRY32 entry;
@@ -247,8 +254,6 @@ HRESULT STDMETHODCALLTYPE CProcessMonitorImpl::updateStatuses(void) {
         HANDLE snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
 
         if (Process32First(snapshot, &entry) == TRUE) {
-            QString errMsg;
-
             while (Process32Next(snapshot, &entry) == TRUE) {
                 if (phandles.contains(entry.th32ProcessID)) {
                     continue;
@@ -279,18 +284,12 @@ HRESULT STDMETHODCALLTYPE CProcessMonitorImpl::updateStatuses(void) {
                     }
                 }
             }
-
-            if (errMsg.length() != 0) {
-                setError(107, errMsg);
-            }
         }
 
         CloseHandle(snapshot);
     }
 
     // Check all opened handles
-    QString errMsg;
-
     QMutableMapIterator<unsigned int, HANDLE> iterator(phandles);
     while (iterator.hasNext()) {
         iterator.next();
