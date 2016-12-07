@@ -18,7 +18,7 @@ void thrd_waitkey() {
 }
 
 void print_status(unsigned int pid, QString pname, unsigned int status) {
-    qDebug() << "";
+    qDebug() << pname << "(" + QString::number(pid) + ")" << "Status: " +  QString::number(status);
 }
 
 int main(int argc, char **argv)
@@ -33,8 +33,7 @@ int main(int argc, char **argv)
 
     QVector<QString> processes;
     processes.push_back("explorer.exe");
-    processes.push_back("Skype.exe");
-    processes.push_back("pageant.exe");
+    processes.push_back("cmd.exe");
 
     foreach (QString processName, processes) {
         qDebug() << "Registering " << processName << " [by name pattern]";
