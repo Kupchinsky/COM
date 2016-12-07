@@ -14,6 +14,10 @@ HRESULT STDMETHODCALLTYPE CProcessMonitorImpl::QueryInterface(REFIID riid, void 
         *ppvObject = static_cast<IProcessMonitor*>(this);
         this->AddRef();
         return S_OK;
+    } else if (riid == IID_IProcessMonitorRegistrar) {
+        *ppvObject = static_cast<IProcessMonitorRegistrar*>(this);
+        this->AddRef();
+        return S_OK;
     }
 
     *ppvObject = NULL;
@@ -37,36 +41,11 @@ ULONG STDMETHODCALLTYPE CProcessMonitorImpl::Release() {
     return nRefCount;
 }
 
-HRESULT STDMETHODCALLTYPE CProcessMonitorImpl::registerProcessByName(wchar_t *name) {
-    setError(0);
-
-    QString nameStr = QString::fromWCharArray(name);
-
-    if (nameStr.length() == 0) {
-        setError(106);
-        return S_FALSE;
-    }
-
-    pnamesLock.lock();
-
-    HRESULT result = S_OK;
-
-    if (pnames.contains(nameStr)) {
-        setError(104);
-        result = S_FALSE;
-    } else {
-        pnames.push_back(nameStr);
-    }
-
-    pnamesLock.unlock();
-    return result;
-}
-
-HRESULT STDMETHODCALLTYPE CProcessMonitorImpl::registerProcessByPid(unsigned int pid) {
+HRESULT STDMETHODCALLTYPE CProcessMonitorImpl::pushPid(unsigned int pid) {
     setError(0);
 
     if (pid == 0) {
-        setError(106);
+        setError(104);
         return S_FALSE;
     }
 
@@ -75,7 +54,7 @@ HRESULT STDMETHODCALLTYPE CProcessMonitorImpl::registerProcessByPid(unsigned int
     HRESULT result = S_OK;
 
     if (pids.contains(pid)) {
-        setError(104);
+        setError(103);
         result = S_FALSE;
     } else {
         HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, pid);
@@ -99,7 +78,7 @@ HRESULT STDMETHODCALLTYPE CProcessMonitorImpl::registerProcessByPid(unsigned int
                 phandles.insert(pid, hProcess);
                 phandlesLock.unlock();
             } else {
-                setError(107, "GetProcessImageFileNameW fails with " + getLastErrorMsg());
+                setError(105, "GetProcessImageFileNameW fails with " + getLastErrorMsg());
                 result = S_FALSE;
 
                 CloseHandle(hProcess);
@@ -114,47 +93,11 @@ HRESULT STDMETHODCALLTYPE CProcessMonitorImpl::registerProcessByPid(unsigned int
     return result;
 }
 
-HRESULT STDMETHODCALLTYPE CProcessMonitorImpl::unregisterProcessByName(wchar_t *name) {
-    setError(0);
-
-    QString nameStr = QString::fromWCharArray(name);
-
-    if (nameStr.length() == 0) {
-        setError(106);
-        return S_FALSE;
-    }
-
-    pnamesLock.lock();
-
-    HRESULT result = S_OK;
-
-    if (pnames.contains(nameStr)) {
-        pnames.removeOne(nameStr);
-
-        ppidnamesLock.lock();
-        QMutableMapIterator<unsigned int, QString> iterator(ppidnames);
-        while (iterator.hasNext()) {
-            iterator.next();
-
-            if (iterator.value().compare(nameStr, Qt::CaseInsensitive) == 0) {
-                iterator.remove();
-            }
-        }
-        ppidnamesLock.unlock();
-    } else {
-        setError(103);
-        result = S_FALSE;
-    }
-
-    pnamesLock.unlock();
-    return result;
-}
-
-HRESULT STDMETHODCALLTYPE CProcessMonitorImpl::unregisterProcessByPid(unsigned int pid) {
+HRESULT STDMETHODCALLTYPE CProcessMonitorImpl::removePid(unsigned int pid) {
     setError(0);
 
     if (pid == 0) {
-        setError(106);
+        setError(104);
         return S_FALSE;
     }
 
@@ -190,16 +133,12 @@ HRESULT STDMETHODCALLTYPE CProcessMonitorImpl::unregisterProcessByPid(unsigned i
     return result;
 }
 
-HRESULT STDMETHODCALLTYPE CProcessMonitorImpl::unregisterAllProcesses(void) {
+HRESULT STDMETHODCALLTYPE CProcessMonitorImpl::clearPids() {
     setError(0);
 
     pidsLock.lock();
     pids.clear();
     pidsLock.unlock();
-
-    pnamesLock.lock();
-    pnames.clear();
-    pnamesLock.unlock();
 
     oldStatusesLock.lock();
     oldStatuses.clear();
@@ -231,7 +170,6 @@ HRESULT STDMETHODCALLTYPE CProcessMonitorImpl::updateStatuses(void) {
     setError(0);
 
     statusesLock.lock();
-    pnamesLock.lock();
     pidsLock.lock();
     oldStatusesLock.lock();
     phandlesLock.lock();
@@ -245,49 +183,6 @@ HRESULT STDMETHODCALLTYPE CProcessMonitorImpl::updateStatuses(void) {
     }
 
     QString errMsg;
-
-    // Check newly created processes
-    if (pnames.size() != 0) {
-        PROCESSENTRY32 entry;
-        entry.dwSize = sizeof(PROCESSENTRY32);
-
-        HANDLE snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
-
-        if (Process32First(snapshot, &entry) == TRUE) {
-            while (Process32Next(snapshot, &entry) == TRUE) {
-                if (phandles.contains(entry.th32ProcessID)) {
-                    continue;
-                }
-
-                bool openHandle = false;
-                QString pname = QString::fromWCharArray(entry.szExeFile);
-
-                foreach (QString name, pnames) {
-                    if (name.compare(pname, Qt::CaseInsensitive) == 0) {
-                        qDebug() << pname << "good";
-
-                        openHandle = true;
-                        break;
-                    }
-                }
-
-                if (openHandle) {
-                    HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, entry.th32ProcessID);
-
-                    if (hProcess == NULL) {
-                        errMsg += "\r\n" + pname + " (" + QString::number(entry.th32ProcessID) +
-                                "): OpenProcess fails with " + getLastErrorMsg();
-                    } else {
-                        qDebug() << "handle opened";
-                        phandles.insert(entry.th32ProcessID, hProcess);
-                        ppidnames.insert(entry.th32ProcessID, pname);
-                    }
-                }
-            }
-        }
-
-        CloseHandle(snapshot);
-    }
 
     // Check all opened handles
     QMutableMapIterator<unsigned int, HANDLE> iterator(phandles);
@@ -338,11 +233,10 @@ HRESULT STDMETHODCALLTYPE CProcessMonitorImpl::updateStatuses(void) {
     }
 
     if (errMsg.length() != 0) {
-        setError(107, errMsg);
+        setError(105, errMsg);
     }
 
     statusesLock.unlock();
-    pnamesLock.unlock();
     pidsLock.unlock();
     oldStatusesLock.unlock();
     phandlesLock.unlock();

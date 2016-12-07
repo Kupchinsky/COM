@@ -16,7 +16,7 @@
 */
 /* @@MIDL_FILE_HEADING(  ) */
 
-#pragma warning( disable: 4049 )  /* more than 64k source lines */
+// #pragma warning( disable: 4049 )  /* more than 64k source lines */
 
 
 /* verify that the <rpcndr.h> version is high enough to compile this file*/
@@ -93,7 +93,7 @@ EXTERN_C const IID IID_IProcessMonitor;
 #if defined(__cplusplus) && !defined(CINTERFACE)
     
     MIDL_INTERFACE("2044b06d-c185-4e6e-a4c2-078a5b6f9ed6")
-    IProcessMonitor : public IUnknown
+    IProcessMonitor : public virtual IUnknown
     {
     public:
         virtual /* [id] */ HRESULT STDMETHODCALLTYPE updateStatuses( void) = 0;
@@ -217,7 +217,7 @@ EXTERN_C const IID IID_IProcessMonitorRegistrar;
 #if defined(__cplusplus) && !defined(CINTERFACE)
     
     MIDL_INTERFACE("2044b06d-c185-4e6e-a4c2-078a5b6f9ed7")
-    IProcessMonitorRegistrar : public IUnknown
+    IProcessMonitorRegistrar : public virtual IUnknown
     {
     public:
         virtual /* [id] */ HRESULT STDMETHODCALLTYPE pushPid( 

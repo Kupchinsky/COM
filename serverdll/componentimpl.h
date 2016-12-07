@@ -9,7 +9,7 @@
 #include <QMapIterator>
 #include <QString>
 
-class CProcessMonitorImpl: public IProcessMonitor {
+class CProcessMonitorImpl: public IProcessMonitor, public IProcessMonitorRegistrar {
     long lRefCount = 0;
     unsigned int iLastError = 0;
     QString lastErrorMsg;
@@ -20,9 +20,6 @@ class CProcessMonitorImpl: public IProcessMonitor {
 
     QList<unsigned int> pids;
     QMutex pidsLock;
-
-    QList<QString> pnames;
-    QMutex pnamesLock;
 
     QMap<unsigned int, QPair<unsigned int, QString>> statuses;
     QMapIterator<unsigned int, QPair<unsigned int, QString>> *statusesIterator = NULL;
@@ -62,13 +59,10 @@ public:
     ULONG STDMETHODCALLTYPE AddRef();
     ULONG STDMETHODCALLTYPE Release();
 
-    HRESULT STDMETHODCALLTYPE registerProcessByName(wchar_t *name);
-    HRESULT STDMETHODCALLTYPE registerProcessByPid(unsigned int pid);
+    HRESULT STDMETHODCALLTYPE pushPid(unsigned int pid);
+    HRESULT STDMETHODCALLTYPE removePid(unsigned int pid);
+    HRESULT STDMETHODCALLTYPE clearPids();
 
-    HRESULT STDMETHODCALLTYPE unregisterProcessByName(wchar_t *name);
-    HRESULT STDMETHODCALLTYPE unregisterProcessByPid(unsigned int pid);
-
-    HRESULT STDMETHODCALLTYPE unregisterAllProcesses(void);
     HRESULT STDMETHODCALLTYPE updateStatuses(void);
 
     HRESULT STDMETHODCALLTYPE getChangedStatusFirst(unsigned int *pid, wchar_t **pname,
@@ -83,11 +77,9 @@ public:
         errors[0] = "No error";
         errors[101] = "Process with this pid not found";
         errors[102] = "Process with this pid not registered";
-        errors[103] = "This process name pattern isn't registered";
-        errors[104] = "Process with same pid already registered";
-        errors[105] = "This process name pattern is already registered";
-        errors[106] = "Empty parameter";
-        errors[107] = "Something went wrong";
+        errors[103] = "Process with same pid already registered";
+        errors[104] = "Empty parameter";
+        errors[105] = "Something went wrong";
         errorsLock.unlock();
     }
 
@@ -97,7 +89,7 @@ public:
             statusesIterator = NULL;
         }
 
-        this->unregisterAllProcesses();
+        this->clearPids();
     }
 };
 #endif // COMPONENTIMPL_H
