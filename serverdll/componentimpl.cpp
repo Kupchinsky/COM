@@ -1,5 +1,9 @@
 #include "componentimpl.h"
 #include "serverdll.h"
+#include <tlhelp32.h>
+#include <psapi.h>
+#include <QDebug>
+#include <QFileInfo>
 
 HRESULT STDMETHODCALLTYPE CProcessMonitorImpl::QueryInterface(REFIID riid, void **ppvObject) {    
     if (riid == IID_IUnknown) {
@@ -74,14 +78,30 @@ HRESULT STDMETHODCALLTYPE CProcessMonitorImpl::registerProcessByPid(unsigned int
         setError(104);
         result = S_FALSE;
     } else {
-        HANDLE hProcess = OpenProcess(PROCESS_TERMINATE, false, pid);
+        HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, pid);
 
         if (hProcess == NULL) {
             setError(101, getLastErrorMsg());
             result = S_FALSE;
         } else {
-            CloseHandle(hProcess);
             pids.push_back(pid);
+
+            phandlesLock.lock();
+            phandles.insert(pid, hProcess);
+            phandlesLock.unlock();
+
+            ppidnamesLock.lock();
+            wchar_t *pname = new wchar_t[MAX_PATH];
+            long pnameLen;
+            pnameLen = GetProcessImageFileNameW(hProcess, pname, MAX_PATH);
+            if (pnameLen != 0) {
+                QString ppathStr = QString::fromWCharArray(pname, pnameLen);
+                QFileInfo fileInfo(ppathStr);
+                ppidnames.insert(pid, fileInfo.fileName());
+            }
+
+            delete[] pname;
+            ppidnamesLock.unlock();
         }
     }
 
@@ -105,6 +125,17 @@ HRESULT STDMETHODCALLTYPE CProcessMonitorImpl::unregisterProcessByName(wchar_t *
 
     if (pnames.contains(nameStr)) {
         pnames.removeOne(nameStr);
+
+        ppidnamesLock.lock();
+        QMutableMapIterator<unsigned int, QString> iterator(ppidnames);
+        while (iterator.hasNext()) {
+            iterator.next();
+
+            if (iterator.value().compare(nameStr, Qt::CaseInsensitive) == 0) {
+                iterator.remove();
+            }
+        }
+        ppidnamesLock.unlock();
     } else {
         setError(103);
         result = S_FALSE;
@@ -128,6 +159,23 @@ HRESULT STDMETHODCALLTYPE CProcessMonitorImpl::unregisterProcessByPid(unsigned i
 
     if (pids.contains(pid)) {
         pids.removeOne(pid);
+
+        oldStatusesLock.lock();
+        oldStatuses.remove(pid);
+        oldStatusesLock.unlock();
+
+        phandlesLock.lock();
+
+        if (phandles.contains(pid)) {
+            CloseHandle(phandles[pid]);
+            phandles.remove(pid);
+        }
+
+        phandlesLock.unlock();
+
+        ppidnamesLock.lock();
+        ppidnames.remove(pid);
+        ppidnamesLock.unlock();
     } else {
         setError(102);
         result = S_FALSE;
@@ -147,6 +195,30 @@ HRESULT STDMETHODCALLTYPE CProcessMonitorImpl::unregisterAllProcesses(void) {
     pnamesLock.lock();
     pnames.clear();
     pnamesLock.unlock();
+
+    oldStatusesLock.lock();
+    oldStatuses.clear();
+    oldStatusesLock.unlock();
+
+    phandlesLock.lock();
+    foreach (HANDLE hProcess, phandles) {
+        CloseHandle(hProcess);
+    }
+    phandles.clear();
+    phandlesLock.unlock();
+
+    statusesLock.lock();
+    if (statusesIterator != NULL) {
+        delete statusesIterator;
+        statusesIterator = NULL;
+    }
+    statuses.clear();
+    statusesLock.unlock();
+
+    ppidnamesLock.lock();
+    ppidnames.clear();
+    ppidnamesLock.unlock();
+
     return S_OK;
 }
 
@@ -154,11 +226,128 @@ HRESULT STDMETHODCALLTYPE CProcessMonitorImpl::updateStatuses(void) {
     setError(0);
 
     statusesLock.lock();
+    pnamesLock.lock();
+    pidsLock.lock();
+    oldStatusesLock.lock();
+    phandlesLock.lock();
+    ppidnamesLock.lock();
+
     statuses.clear();
 
-    // TODO: fetch statuses
+    if (statusesIterator != NULL) {
+        delete statusesIterator;
+        statusesIterator = NULL;
+    }
+
+    // Check newly created processes
+    if (pnames.size() != 0) {
+        PROCESSENTRY32 entry;
+        entry.dwSize = sizeof(PROCESSENTRY32);
+
+        HANDLE snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+
+        if (Process32First(snapshot, &entry) == TRUE) {
+            QString errMsg;
+
+            while (Process32Next(snapshot, &entry) == TRUE) {
+                if (phandles.contains(entry.th32ProcessID)) {
+                    continue;
+                }
+
+                bool openHandle = false;
+                QString pname = QString::fromWCharArray(entry.szExeFile);
+
+                foreach (QString name, pnames) {
+                    if (name.compare(pname, Qt::CaseInsensitive) == 0) {
+                        qDebug() << pname << "good";
+
+                        openHandle = true;
+                        break;
+                    }
+                }
+
+                if (openHandle) {
+                    HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, entry.th32ProcessID);
+
+                    if (hProcess == NULL) {
+                        errMsg += "\r\n" + pname + " (" + QString::number(entry.th32ProcessID) +
+                                "): OpenProcess fails with " + getLastErrorMsg();
+                    } else {
+                        qDebug() << "handle opened";
+                        phandles.insert(entry.th32ProcessID, hProcess);
+                        ppidnames.insert(entry.th32ProcessID, pname);
+                    }
+                }
+            }
+
+            if (errMsg.length() != 0) {
+                setError(107, errMsg);
+            }
+        }
+
+        CloseHandle(snapshot);
+    }
+
+    // Check all opened handles
+    QString errMsg;
+
+    QMutableMapIterator<unsigned int, HANDLE> iterator(phandles);
+    while (iterator.hasNext()) {
+        iterator.next();
+
+        unsigned int pid = iterator.key();
+        HANDLE hProcess = iterator.value();
+        DWORD status;
+
+        qDebug() << "Process" << pid;
+
+        if (GetExitCodeProcess(hProcess, &status) == TRUE) {
+            bool isChanged = false;
+
+            if (oldStatuses.contains(pid)) {
+                qDebug() << "Old status" << oldStatuses[pid];
+
+                if (oldStatuses[pid] != status) {
+                    qDebug() << "Changed" << status;
+                    isChanged = true;
+                    oldStatuses[pid] = status;
+                }
+            } else {
+                qDebug() << "No old status -> changed" << status;
+                isChanged = true;
+                oldStatuses.insert(pid, status);
+            }
+
+            if (isChanged) {
+                statuses.insert(pid, QPair<unsigned int, QString>(status, ppidnames[pid]));
+
+                if (status != STILL_ACTIVE) {
+                    CloseHandle(hProcess);
+
+                    qDebug() << "Removed" << ppidnames[pid] << pid;
+
+                    oldStatuses.remove(pid);
+                    ppidnames.remove(pid);
+
+                    iterator.remove();
+                }
+            }
+        } else {
+            errMsg += "\r\nProcessId " + QString::number(pid) +
+                    ": GetExitCodeProcess fails with " + getLastErrorMsg();
+        }
+    }
+
+    if (errMsg.length() != 0) {
+        setError(107, errMsg);
+    }
 
     statusesLock.unlock();
+    pnamesLock.unlock();
+    pidsLock.unlock();
+    oldStatusesLock.unlock();
+    phandlesLock.unlock();
+    ppidnamesLock.unlock();
     return S_OK;
 }
 
@@ -224,13 +413,13 @@ HRESULT STDMETHODCALLTYPE CProcessMonitorImpl::getChangedStatusNext(unsigned int
 
 HRESULT STDMETHODCALLTYPE CProcessMonitorImpl::getLastError(unsigned int *code, wchar_t **msg,
                                                             unsigned int *msglen) {
+    lastErrorLock.lock();
+
     if (code != NULL) {
-        lastErrorLock.lock();
         *code = this->iLastError;
-        lastErrorLock.unlock();
     }
 
-    if (msg != NULL) {
+    if (msg != NULL && msglen != NULL) {
         errorsLock.lock();
         QString qmsg = this->errors.value(this->iLastError, "Unknown error");
 
@@ -243,5 +432,6 @@ HRESULT STDMETHODCALLTYPE CProcessMonitorImpl::getLastError(unsigned int *code, 
         errorsLock.unlock();
     }
 
+    lastErrorLock.unlock();
     return S_OK;
 }

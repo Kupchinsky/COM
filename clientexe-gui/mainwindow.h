@@ -35,6 +35,8 @@ private slots:
 
     void on_checkBox_2_stateChanged(int arg1);
 
+    void on_pushButton_clicked();
+
 private:
     Ui::MainWindow *ui;
     IProcessMonitor *iPM;
@@ -71,6 +73,8 @@ public slots:
                 MainWindow::showErrorMessage(NULL, this->iPM);
                 continue;
             }
+
+            statuses.clear();
 
             unsigned int resultPid;
             wchar_t *resultPname;

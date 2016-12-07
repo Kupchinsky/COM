@@ -35,4 +35,4 @@ Debug:QMAKE_LINK = dlltool -e debug/exports.o --kill-at debug/serverdll.o && g++
 Release:LIBS += release/exports.o
 Debug:LIBS += debug/exports.o
 
-LIBS += -luuid -loleaut32 -lole32
+LIBS += -luuid -loleaut32 -lole32 -lpsapi

@@ -180,9 +180,33 @@ void MainWindow::on_checkBox_stateChanged(int arg1)
 
 void MainWindow::on_pushButton_5_clicked()
 {
-    if (iPM->updateStatuses() != S_OK) {
+    iPM->updateStatuses();
+
+    unsigned int code;
+    iPM->getLastError(&code, NULL, NULL);
+
+    if (code != 0) {
         this->showError();
     }
+
+    QMap<unsigned int, QPair<unsigned int, QString>> statuses;
+
+    unsigned int resultPid;
+    wchar_t *resultPname;
+    unsigned int resultPnamelen;
+    unsigned int resultStatus;
+
+    if (iPM->getChangedStatusFirst(&resultPid, &resultPname, &resultPnamelen, &resultStatus) == S_OK) {
+        QString pnameStr = QString::fromWCharArray(resultPname, resultPnamelen);
+        statuses[resultPid] = QPair<unsigned int, QString>(resultStatus, pnameStr);
+
+        while (iPM->getChangedStatusNext(&resultPid, &resultPname, &resultPnamelen, &resultStatus) == S_OK) {
+            pnameStr = QString::fromWCharArray(resultPname, resultPnamelen);
+            statuses[resultPid] = QPair<unsigned int, QString>(resultStatus, pnameStr);
+        }
+    }
+
+    emit handleResults(statuses);
 }
 
 void MainWindow::on_checkBox_2_stateChanged(int arg1)
@@ -202,16 +226,21 @@ void MainWindow::handleResults(QMap<unsigned int, QPair<unsigned int, QString>> 
         unsigned int pid = iterator.key();
         QPair<unsigned int, QString> pair = iterator.value();
 
-        int row = ui->tableWidgetR->rowCount();
+        int row = ui->tableWidget->rowCount();
 
-        ui->tableWidgetR->insertRow(row);
-        ui->tableWidgetR->setItem(row, 0, new QTableWidgetItem(QString::number(pid)));
-        ui->tableWidgetR->setItem(row, 1, new QTableWidgetItem(pair.second));
-        ui->tableWidgetR->setItem(row, 2, new QTableWidgetItem(QString::number(pair.first)));
-        ui->tableWidgetR->setItem(row, 3, new QTableWidgetItem(time));
+        ui->tableWidget->insertRow(row);
+        ui->tableWidget->setItem(row, 0, new QTableWidgetItem(QString::number(pid)));
+        ui->tableWidget->setItem(row, 1, new QTableWidgetItem(pair.second));
+        ui->tableWidget->setItem(row, 2, new QTableWidgetItem(QString::number(pair.first)));
+        ui->tableWidget->setItem(row, 3, new QTableWidgetItem(time));
     }
 
     if (ui->checkBox_2->isChecked()) {
         ui->tableWidget->scrollToBottom();
     }
+}
+
+void MainWindow::on_pushButton_clicked()
+{
+    ui->tableWidget->setRowCount(0);
 }

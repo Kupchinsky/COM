@@ -28,6 +28,15 @@ class CProcessMonitorImpl: public IProcessMonitor {
     QMapIterator<unsigned int, QPair<unsigned int, QString>> *statusesIterator = NULL;
     QMutex statusesLock;
 
+    QMap<unsigned int, unsigned int> oldStatuses;
+    QMutex oldStatusesLock;
+
+    QMap<unsigned int, HANDLE> phandles;
+    QMutex phandlesLock;
+
+    QMap<unsigned int, QString> ppidnames;
+    QMutex ppidnamesLock;
+
     void setError(unsigned int code, QString msg = "") {
         lastErrorLock.lock();
         iLastError = code;
@@ -78,10 +87,17 @@ public:
         errors[104] = "Process with same pid already registered";
         errors[105] = "This process name pattern is already registered";
         errors[106] = "Empty parameter";
+        errors[107] = "Something went wrong";
         errorsLock.unlock();
     }
 
     virtual ~CProcessMonitorImpl() {
+        if (statusesIterator != NULL) {
+            delete statusesIterator;
+            statusesIterator = NULL;
+        }
+
+        this->unregisterAllProcesses();
     }
 };
 #endif // COMPONENTIMPL_H
