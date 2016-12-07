@@ -29,7 +29,7 @@ int main(int argc, char **argv)
     ResultChecker::check(CoCreateInstance(LIBID_ProcessManager, NULL, CLSCTX_INPROC_SERVER,
                                           IID_IProcessMonitor, (void**) &iPM));
 
-    qDebug() << "Registering...";
+    qDebug() << "Registering by name...";
 
     QVector<QString> processes;
     processes.push_back("explorer.exe");
