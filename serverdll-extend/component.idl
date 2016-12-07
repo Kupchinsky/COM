@@ -1,0 +1,29 @@
+import "unknwn.idl";
+
+[
+uuid(2044b06d-c185-4e6e-a4c2-078a5b6f9ed0),
+version(1.0)
+]
+interface IProcessMonitorRegistrarEx: IUnknown
+{
+    [id(1)] HRESULT registerProcessByName(wchar_t *name);
+    [id(2)] HRESULT registerProcessByPid(unsigned int pid);
+
+    [id(3)] HRESULT unregisterProcessByName(wchar_t *name);
+    [id(4)] HRESULT unregisterProcessByPid(unsigned int pid);
+    [id(5)] HRESULT unregisterAllProcesses();
+
+    [id(6)] HRESULT getLastError([out] unsigned int *code, [out, size_is(, *msglen)] wchar_t **msg, [out] unsigned int *msglen);
+}
+
+[
+uuid(3ff1aab8-f3d8-11d4-825d-00194b3646c1),
+version(1.0)
+]
+library ProcessManagerEx
+{
+	importlib("stdole32.tlb");
+	importlib("stdole2.tlb");
+
+	interface IProcessMonitorRegistrarEx;
+}
