@@ -55,21 +55,86 @@ HRESULT STDMETHODCALLTYPE CProcessMonitorImpl::registerProcessByName(wchar_t *na
     }
 
     pnamesLock.unlock();
-
     return result;
 }
 
 HRESULT STDMETHODCALLTYPE CProcessMonitorImpl::registerProcessByPid(unsigned int pid) {
-    setError(101);
-    return S_FALSE;
+    setError(0);
+
+    if (pid == 0) {
+        setError(106);
+        return S_FALSE;
+    }
+
+    pidsLock.lock();
+
+    HRESULT result = S_OK;
+
+    if (pids.contains(pid)) {
+        setError(104);
+        result = S_FALSE;
+    } else {
+        HANDLE hProcess = OpenProcess(PROCESS_TERMINATE, false, pid);
+
+        if (hProcess == NULL) {
+            setError(101, getLastErrorMsg());
+            result = S_FALSE;
+        } else {
+            CloseHandle(hProcess);
+            pids.push_back(pid);
+        }
+    }
+
+    pidsLock.unlock();
+    return result;
 }
 
 HRESULT STDMETHODCALLTYPE CProcessMonitorImpl::unregisterProcessByName(wchar_t *name) {
-    return S_OK;
+    setError(0);
+
+    QString nameStr = QString::fromWCharArray(name);
+
+    if (nameStr.length() == 0) {
+        setError(106);
+        return S_FALSE;
+    }
+
+    pnamesLock.lock();
+
+    HRESULT result = S_OK;
+
+    if (pnames.contains(nameStr)) {
+        pnames.removeOne(nameStr);
+    } else {
+        setError(103);
+        result = S_FALSE;
+    }
+
+    pnamesLock.unlock();
+    return result;
 }
 
 HRESULT STDMETHODCALLTYPE CProcessMonitorImpl::unregisterProcessByPid(unsigned int pid) {
-    return S_OK;
+    setError(0);
+
+    if (pid == 0) {
+        setError(106);
+        return S_FALSE;
+    }
+
+    pidsLock.lock();
+
+    HRESULT result = S_OK;
+
+    if (pids.contains(pid)) {
+        pids.removeOne(pid);
+    } else {
+        setError(102);
+        result = S_FALSE;
+    }
+
+    pidsLock.unlock();
+    return result;
 }
 
 HRESULT STDMETHODCALLTYPE CProcessMonitorImpl::unregisterAllProcesses(void) {
@@ -168,6 +233,10 @@ HRESULT STDMETHODCALLTYPE CProcessMonitorImpl::getLastError(unsigned int *code, 
     if (msg != NULL) {
         errorsLock.lock();
         QString qmsg = this->errors.value(this->iLastError, "Unknown error");
+
+        if (lastErrorMsg.length() != 0) {
+            qmsg += " [" + lastErrorMsg + "]";
+        }
 
         *msg = new wchar_t[qmsg.size()];
         *msglen = qmsg.toWCharArray(*msg);
