@@ -4,7 +4,7 @@
 
 
  /* File created by MIDL compiler version 8.00.0603 */
-/* at Wed Dec 07 15:13:46 2016
+/* at Sat Dec 10 21:03:43 2016
  */
 /* Compiler settings for component.idl:
     Oicf, W1, Zp8, env=Win32 (32b run), target_arch=X86 8.00.0603 
@@ -52,6 +52,13 @@ typedef interface IProcessMonitorRegistrarEx IProcessMonitorRegistrarEx;
 #endif 	/* __IProcessMonitorRegistrarEx_FWD_DEFINED__ */
 
 
+#ifndef __IProcessMonitorRegistrarExDispatch_FWD_DEFINED__
+#define __IProcessMonitorRegistrarExDispatch_FWD_DEFINED__
+typedef interface IProcessMonitorRegistrarExDispatch IProcessMonitorRegistrarExDispatch;
+
+#endif 	/* __IProcessMonitorRegistrarExDispatch_FWD_DEFINED__ */
+
+
 #ifndef __IProcessMonitorRegistrarEx_FWD_DEFINED__
 #define __IProcessMonitorRegistrarEx_FWD_DEFINED__
 typedef interface IProcessMonitorRegistrarEx IProcessMonitorRegistrarEx;
@@ -59,8 +66,17 @@ typedef interface IProcessMonitorRegistrarEx IProcessMonitorRegistrarEx;
 #endif 	/* __IProcessMonitorRegistrarEx_FWD_DEFINED__ */
 
 
+#ifndef __IProcessMonitorRegistrarExDispatch_FWD_DEFINED__
+#define __IProcessMonitorRegistrarExDispatch_FWD_DEFINED__
+typedef interface IProcessMonitorRegistrarExDispatch IProcessMonitorRegistrarExDispatch;
+
+#endif 	/* __IProcessMonitorRegistrarExDispatch_FWD_DEFINED__ */
+
+
 /* header files for imported files */
 #include "unknwn.h"
+#include "oaidl.h"
+#include "ocidl.h"
 
 #ifdef __cplusplus
 extern "C"{
@@ -83,13 +99,13 @@ EXTERN_C const IID IID_IProcessMonitorRegistrarEx;
     {
     public:
         virtual /* [id] */ HRESULT STDMETHODCALLTYPE registerProcessByName( 
-            wchar_t *name) = 0;
+            BSTR name) = 0;
         
         virtual /* [id] */ HRESULT STDMETHODCALLTYPE registerProcessByPid( 
             unsigned int pid) = 0;
         
         virtual /* [id] */ HRESULT STDMETHODCALLTYPE unregisterProcessByName( 
-            wchar_t *name) = 0;
+            BSTR name) = 0;
         
         virtual /* [id] */ HRESULT STDMETHODCALLTYPE unregisterProcessByPid( 
             unsigned int pid) = 0;
@@ -98,7 +114,7 @@ EXTERN_C const IID IID_IProcessMonitorRegistrarEx;
         
         virtual /* [id] */ HRESULT STDMETHODCALLTYPE getLastError( 
             /* [out] */ unsigned int *code,
-            /* [size_is][size_is][out] */ wchar_t **msg,
+            /* [size_is][size_is][out] */ LPBSTR msg,
             /* [out] */ unsigned int *msglen) = 0;
         
     };
@@ -124,7 +140,7 @@ EXTERN_C const IID IID_IProcessMonitorRegistrarEx;
         
         /* [id] */ HRESULT ( STDMETHODCALLTYPE *registerProcessByName )( 
             IProcessMonitorRegistrarEx * This,
-            wchar_t *name);
+            BSTR name);
         
         /* [id] */ HRESULT ( STDMETHODCALLTYPE *registerProcessByPid )( 
             IProcessMonitorRegistrarEx * This,
@@ -132,7 +148,7 @@ EXTERN_C const IID IID_IProcessMonitorRegistrarEx;
         
         /* [id] */ HRESULT ( STDMETHODCALLTYPE *unregisterProcessByName )( 
             IProcessMonitorRegistrarEx * This,
-            wchar_t *name);
+            BSTR name);
         
         /* [id] */ HRESULT ( STDMETHODCALLTYPE *unregisterProcessByPid )( 
             IProcessMonitorRegistrarEx * This,
@@ -144,7 +160,7 @@ EXTERN_C const IID IID_IProcessMonitorRegistrarEx;
         /* [id] */ HRESULT ( STDMETHODCALLTYPE *getLastError )( 
             IProcessMonitorRegistrarEx * This,
             /* [out] */ unsigned int *code,
-            /* [size_is][size_is][out] */ wchar_t **msg,
+            /* [size_is][size_is][out] */ LPBSTR msg,
             /* [out] */ unsigned int *msglen);
         
         END_INTERFACE
@@ -208,10 +224,131 @@ EXTERN_C const IID IID_IProcessMonitorRegistrarEx;
 
 
 
+
 EXTERN_C const IID LIBID_ProcessManagerEx;
+
+#ifndef __IProcessMonitorRegistrarExDispatch_DISPINTERFACE_DEFINED__
+#define __IProcessMonitorRegistrarExDispatch_DISPINTERFACE_DEFINED__
+
+/* dispinterface IProcessMonitorRegistrarExDispatch */
+/* [uuid] */ 
+
+
+EXTERN_C const IID DIID_IProcessMonitorRegistrarExDispatch;
+
+#if defined(__cplusplus) && !defined(CINTERFACE)
+
+    MIDL_INTERFACE("2044b06d-c185-4e6e-a4c2-078a5b6f9ed1")
+    IProcessMonitorRegistrarExDispatch : public IDispatch
+    {
+    };
+    
+#else 	/* C style interface */
+
+    typedef struct IProcessMonitorRegistrarExDispatchVtbl
+    {
+        BEGIN_INTERFACE
+        
+        HRESULT ( STDMETHODCALLTYPE *QueryInterface )( 
+            IProcessMonitorRegistrarExDispatch * This,
+            /* [in] */ REFIID riid,
+            /* [annotation][iid_is][out] */ 
+            _COM_Outptr_  void **ppvObject);
+        
+        ULONG ( STDMETHODCALLTYPE *AddRef )( 
+            IProcessMonitorRegistrarExDispatch * This);
+        
+        ULONG ( STDMETHODCALLTYPE *Release )( 
+            IProcessMonitorRegistrarExDispatch * This);
+        
+        HRESULT ( STDMETHODCALLTYPE *GetTypeInfoCount )( 
+            IProcessMonitorRegistrarExDispatch * This,
+            /* [out] */ UINT *pctinfo);
+        
+        HRESULT ( STDMETHODCALLTYPE *GetTypeInfo )( 
+            IProcessMonitorRegistrarExDispatch * This,
+            /* [in] */ UINT iTInfo,
+            /* [in] */ LCID lcid,
+            /* [out] */ ITypeInfo **ppTInfo);
+        
+        HRESULT ( STDMETHODCALLTYPE *GetIDsOfNames )( 
+            IProcessMonitorRegistrarExDispatch * This,
+            /* [in] */ REFIID riid,
+            /* [size_is][in] */ LPOLESTR *rgszNames,
+            /* [range][in] */ UINT cNames,
+            /* [in] */ LCID lcid,
+            /* [size_is][out] */ DISPID *rgDispId);
+        
+        /* [local] */ HRESULT ( STDMETHODCALLTYPE *Invoke )( 
+            IProcessMonitorRegistrarExDispatch * This,
+            /* [annotation][in] */ 
+            _In_  DISPID dispIdMember,
+            /* [annotation][in] */ 
+            _In_  REFIID riid,
+            /* [annotation][in] */ 
+            _In_  LCID lcid,
+            /* [annotation][in] */ 
+            _In_  WORD wFlags,
+            /* [annotation][out][in] */ 
+            _In_  DISPPARAMS *pDispParams,
+            /* [annotation][out] */ 
+            _Out_opt_  VARIANT *pVarResult,
+            /* [annotation][out] */ 
+            _Out_opt_  EXCEPINFO *pExcepInfo,
+            /* [annotation][out] */ 
+            _Out_opt_  UINT *puArgErr);
+        
+        END_INTERFACE
+    } IProcessMonitorRegistrarExDispatchVtbl;
+
+    interface IProcessMonitorRegistrarExDispatch
+    {
+        CONST_VTBL struct IProcessMonitorRegistrarExDispatchVtbl *lpVtbl;
+    };
+
+    
+
+#ifdef COBJMACROS
+
+
+#define IProcessMonitorRegistrarExDispatch_QueryInterface(This,riid,ppvObject)	\
+    ( (This)->lpVtbl -> QueryInterface(This,riid,ppvObject) ) 
+
+#define IProcessMonitorRegistrarExDispatch_AddRef(This)	\
+    ( (This)->lpVtbl -> AddRef(This) ) 
+
+#define IProcessMonitorRegistrarExDispatch_Release(This)	\
+    ( (This)->lpVtbl -> Release(This) ) 
+
+
+#define IProcessMonitorRegistrarExDispatch_GetTypeInfoCount(This,pctinfo)	\
+    ( (This)->lpVtbl -> GetTypeInfoCount(This,pctinfo) ) 
+
+#define IProcessMonitorRegistrarExDispatch_GetTypeInfo(This,iTInfo,lcid,ppTInfo)	\
+    ( (This)->lpVtbl -> GetTypeInfo(This,iTInfo,lcid,ppTInfo) ) 
+
+#define IProcessMonitorRegistrarExDispatch_GetIDsOfNames(This,riid,rgszNames,cNames,lcid,rgDispId)	\
+    ( (This)->lpVtbl -> GetIDsOfNames(This,riid,rgszNames,cNames,lcid,rgDispId) ) 
+
+#define IProcessMonitorRegistrarExDispatch_Invoke(This,dispIdMember,riid,lcid,wFlags,pDispParams,pVarResult,pExcepInfo,puArgErr)	\
+    ( (This)->lpVtbl -> Invoke(This,dispIdMember,riid,lcid,wFlags,pDispParams,pVarResult,pExcepInfo,puArgErr) ) 
+
+#endif /* COBJMACROS */
+
+
+#endif 	/* C style interface */
+
+
+#endif 	/* __IProcessMonitorRegistrarExDispatch_DISPINTERFACE_DEFINED__ */
+
 #endif /* __ProcessManagerEx_LIBRARY_DEFINED__ */
 
 /* Additional Prototypes for ALL interfaces */
+
+unsigned long             __RPC_USER  BSTR_UserSize(     unsigned long *, unsigned long            , BSTR * ); 
+unsigned char * __RPC_USER  BSTR_UserMarshal(  unsigned long *, unsigned char *, BSTR * ); 
+unsigned char * __RPC_USER  BSTR_UserUnmarshal(unsigned long *, unsigned char *, BSTR * ); 
+void                      __RPC_USER  BSTR_UserFree(     unsigned long *, BSTR * ); 
 
 /* end of Additional Prototypes */
 

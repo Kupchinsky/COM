@@ -25,27 +25,30 @@ int main(int argc, char **argv)
 {
     CoInitialize(NULL);
 
-    IProcessMonitor *iPM;
+    IUnknown *iUnk;
     ResultChecker::check(CoCreateInstance(LIBID_ProcessManager, NULL, CLSCTX_INPROC_SERVER,
-                                          IID_IProcessMonitor, (void**) &iPM));
+                                          IID_IUnknown, (void**) &iUnk));
 
-    qDebug() << "Registering by name...";
+    IProcessMonitor *iPM;
+    IProcessMonitorRegistrar *iPMR;
 
-    QVector<QString> processes;
-    processes.push_back("explorer.exe");
-    processes.push_back("cmd.exe");
+    ResultChecker::check(iUnk->QueryInterface(IID_IProcessMonitor, (void**) &iPM));
+    ResultChecker::check(iUnk->QueryInterface(IID_IProcessMonitorRegistrar, (void**) &iPMR));
 
-    foreach (QString processName, processes) {
-        qDebug() << "Registering " << processName << " [by name pattern]";
+    qDebug() << "[IProcessMonitorRegistrar] Registering by pids...";
 
-        wchar_t *str = (wchar_t*) processName.toStdWString().c_str();
+    QVector<unsigned int> processes;
+    //processes.push_back();
 
-        if (iPM->registerProcessByName(str) != S_OK) {
+    foreach (unsigned int pid, processes) {
+        qDebug() << "[IProcessMonitorRegistrar] Registering" << pid << "by pid";
+
+        if (iPMR->pushPid(pid) != S_OK) {
             wchar_t *errorMsg;
             unsigned int errorMsgLen;
 
-            if (iPM->getLastError(NULL, &errorMsg, &errorMsgLen) == S_OK) {
-                qDebug() << "Registering failed!" << QString::fromWCharArray(errorMsg, errorMsgLen);
+            if (iPMR->getLastError(NULL, &errorMsg, &errorMsgLen) == S_OK) {
+                qDebug() << "[IProcessMonitorRegistrar] Registering failed!" << QString::fromWCharArray(errorMsg, errorMsgLen);
             }
         }
     }
@@ -88,7 +91,9 @@ int main(int argc, char **argv)
         }
     }
 
-    ResultChecker::check(iPM->Release());
+    iUnk->Release();
+    iPM->Release();
+    iPMR->Release();
 
     CoUninitialize();
     return 0;

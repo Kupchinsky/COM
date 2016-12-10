@@ -15,7 +15,8 @@ SOURCES += \
     componentimpl.cpp \
     componentfactory.cpp \
     component_i.c \
-    serverdll.cpp
+    serverdll.cpp \
+    compoinentdispimpl.cpp
 
 HEADERS +=\
     componentimpl.h \

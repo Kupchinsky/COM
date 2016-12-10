@@ -7,7 +7,11 @@
 
 HRESULT STDMETHODCALLTYPE CProcessMonitorImpl::QueryInterface(REFIID riid, void **ppvObject) {    
     if (riid == IID_IUnknown) {
-        *ppvObject = static_cast<IUnknown*>(this);
+        *ppvObject = static_cast<IUnknown*>(static_cast<IProcessMonitor*>(this));
+        this->AddRef();
+        return S_OK;
+    } else if (riid == IID_IDispatch) {
+        *ppvObject = static_cast<IDispatch*>(static_cast<IProcessMonitor*>(this));
         this->AddRef();
         return S_OK;
     } else if (riid == IID_IProcessMonitor) {
@@ -245,7 +249,7 @@ HRESULT STDMETHODCALLTYPE CProcessMonitorImpl::updateStatuses(void) {
 }
 
 HRESULT STDMETHODCALLTYPE CProcessMonitorImpl::getChangedStatusFirst(unsigned int *pid,
-                                                                     wchar_t **pname,
+                                                                     LPBSTR pname,
                                                                      unsigned int *pnamelen,
                                                                      unsigned int *status) {
     setError(0);
@@ -278,7 +282,7 @@ HRESULT STDMETHODCALLTYPE CProcessMonitorImpl::getChangedStatusFirst(unsigned in
 }
 
 HRESULT STDMETHODCALLTYPE CProcessMonitorImpl::getChangedStatusNext(unsigned int *pid,
-                                                                    wchar_t **pname,
+                                                                    LPBSTR pname,
                                                                     unsigned int *pnamelen,
                                                                     unsigned int *status) {
     setError(0);
@@ -304,7 +308,8 @@ HRESULT STDMETHODCALLTYPE CProcessMonitorImpl::getChangedStatusNext(unsigned int
     return result;
 }
 
-HRESULT STDMETHODCALLTYPE CProcessMonitorImpl::getLastError(unsigned int *code, wchar_t **msg,
+HRESULT STDMETHODCALLTYPE CProcessMonitorImpl::getLastError(unsigned int *code,
+                                                            LPBSTR msg,
                                                             unsigned int *msglen) {
     lastErrorLock.lock();
 
@@ -327,4 +332,25 @@ HRESULT STDMETHODCALLTYPE CProcessMonitorImpl::getLastError(unsigned int *code, 
 
     lastErrorLock.unlock();
     return S_OK;
+}
+
+void CProcessMonitorImpl::setError(unsigned int code, QString msg) {
+    lastErrorLock.lock();
+    iLastError = code;
+    lastErrorMsg = msg;
+    lastErrorLock.unlock();
+}
+
+QString CProcessMonitorImpl::getLastErrorMsg() {
+    LPWSTR bufPtr = NULL;
+    DWORD err = GetLastError();
+    FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER |
+                   FORMAT_MESSAGE_FROM_SYSTEM |
+                   FORMAT_MESSAGE_IGNORE_INSERTS,
+                   NULL, err, 0, (LPWSTR)&bufPtr, 0, NULL);
+    const QString result =
+        (bufPtr) ? QString::fromUtf16((const ushort*)bufPtr).trimmed() :
+                   QString("Unknown Error %1").arg(err);
+    LocalFree(bufPtr);
+    return result;
 }

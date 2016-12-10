@@ -1,42 +1,69 @@
 import "unknwn.idl";
+import "oaidl.idl";
+import "ocidl.idl";
 
 [
+object,
 uuid(2044b06d-c185-4e6e-a4c2-078a5b6f9ed6),
-version(1.0)
+local
 ]
-interface IProcessMonitor: IUnknown
+interface IProcessMonitor: IDispatch
 {
     [id(1)] HRESULT updateStatuses();
 
     [id(2)] HRESULT getChangedStatusFirst(	[out] unsigned int *pid,
-											[out, size_is(, *pnamelen)] wchar_t **pname,
+											[out, size_is(, *pnamelen)] LPBSTR pname,
 											[out] unsigned int *pnamelen,
 											[out] unsigned int *status);
 
 	[id(3)] HRESULT getChangedStatusNext(	[out] unsigned int *pid,
-											[out, size_is(, *pnamelen)] wchar_t **pname,
+											[out, size_is(, *pnamelen)] LPBSTR pname,
 											[out] unsigned int *pnamelen,
 											[out] unsigned int *status);
 
-    [id(4)] HRESULT getLastError([out] unsigned int *code, [out, size_is(, *msglen)] wchar_t **msg, [out] unsigned int *msglen);
+    [id(4)] HRESULT getLastError([out] unsigned int *code, [out, size_is(, *msglen)] LPBSTR msg, [out] unsigned int *msglen);
 }
 
 [
+object,
 uuid(2044b06d-c185-4e6e-a4c2-078a5b6f9ed7),
-version(1.0)
+local
 ]
-interface IProcessMonitorRegistrar: IUnknown
+interface IProcessMonitorRegistrar: IDispatch
 {
     [id(1)] HRESULT pushPid(unsigned int pid);
     [id(2)] HRESULT removePid(unsigned int pid);
     [id(3)] HRESULT clearPids();
 
-    [id(4)] HRESULT getLastError([out] unsigned int *code, [out, size_is(, *msglen)] wchar_t **msg, [out] unsigned int *msglen);
+    [id(4)] HRESULT getLastError([out] unsigned int *code, [out, size_is(, *msglen)] LPBSTR msg, [out] unsigned int *msglen);
 }
 
 [
-uuid(3ff1aab8-f3d8-11d4-825d-00194b3646c0),
-version(1.0)
+uuid(2044b06d-c185-4e6e-a4c2-078a5b6f9ed8)
+]
+dispinterface IProcessMonitorDisp
+{
+properties:
+    [id(1)] unsigned int LastError;
+    [id(2)] BSTR LastErrorMsg;
+
+methods:
+    [id(3)] HRESULT PushPid(unsigned int pid);
+    [id(4)] HRESULT RemovePid(unsigned int pid);
+    [id(5)] HRESULT ClearPids();
+
+    [id(6)] HRESULT UpdateStatuses();
+    [id(7)] HRESULT GetChangedStatusFirst(	[out] unsigned int *pid,
+											[out] LPBSTR pname,
+											[out] unsigned int *status);
+
+	[id(8)] HRESULT GetChangedStatusNext(	[out] unsigned int *pid,
+											[out] LPBSTR pname,
+											[out] unsigned int *status);
+};
+
+[
+uuid(3ff1aab8-f3d8-11d4-825d-00194b3646c0)
 ]
 library ProcessManager
 {
@@ -45,4 +72,5 @@ library ProcessManager
 
 	interface IProcessMonitor;
 	interface IProcessMonitorRegistrar;
+	dispinterface IProcessMonitorDisp;
 }

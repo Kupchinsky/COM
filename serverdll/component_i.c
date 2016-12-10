@@ -6,7 +6,7 @@
 
 
  /* File created by MIDL compiler version 8.00.0603 */
-/* at Wed Dec 07 15:13:51 2016
+/* at Sat Dec 10 21:03:33 2016
  */
 /* Compiler settings for component.idl:
     Oicf, W1, Zp8, env=Win32 (32b run), target_arch=X86 8.00.0603 
@@ -18,7 +18,7 @@
 */
 /* @@MIDL_FILE_HEADING(  ) */
 
-#pragma warning( disable: 4049 )  /* more than 64k source lines */
+//#pragma warning( disable: 4049 )  /* more than 64k source lines */
 
 
 #ifdef __cplusplus
@@ -71,6 +71,9 @@ MIDL_DEFINE_GUID(IID, IID_IProcessMonitor,0x2044b06d,0xc185,0x4e6e,0xa4,0xc2,0x0
 
 
 MIDL_DEFINE_GUID(IID, IID_IProcessMonitorRegistrar,0x2044b06d,0xc185,0x4e6e,0xa4,0xc2,0x07,0x8a,0x5b,0x6f,0x9e,0xd7);
+
+
+MIDL_DEFINE_GUID(IID, DIID_IProcessMonitorDisp,0x2044b06d,0xc185,0x4e6e,0xa4,0xc2,0x07,0x8a,0x5b,0x6f,0x9e,0xd8);
 
 
 MIDL_DEFINE_GUID(IID, LIBID_ProcessManager,0x3ff1aab8,0xf3d8,0x11d4,0x82,0x5d,0x00,0x19,0x4b,0x36,0x46,0xc0);
