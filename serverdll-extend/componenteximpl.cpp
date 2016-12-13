@@ -66,7 +66,6 @@ HRESULT STDMETHODCALLTYPE CProcessMonitorExImpl::clearPids() {
 HRESULT STDMETHODCALLTYPE CProcessMonitorExImpl::updateStatuses(void) {
     setError(0);
 
-    // TODO: update names
     // Check newly created processes
     if (pnames.size() != 0) {
         PROCESSENTRY32 entry;
@@ -76,32 +75,15 @@ HRESULT STDMETHODCALLTYPE CProcessMonitorExImpl::updateStatuses(void) {
 
         if (Process32First(snapshot, &entry) == TRUE) {
             while (Process32Next(snapshot, &entry) == TRUE) {
-                if (phandles.contains(entry.th32ProcessID)) {
-                    continue;
-                }
-
-                bool openHandle = false;
                 QString pname = QString::fromWCharArray(entry.szExeFile);
 
                 foreach (QString name, pnames) {
                     if (name.compare(pname, Qt::CaseInsensitive) == 0) {
                         qDebug() << LOGTAG << pname << "good";
 
-                        openHandle = true;
-                        break;
-                    }
-                }
-
-                if (openHandle) {
-                    HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, entry.th32ProcessID);
-
-                    if (hProcess == NULL) {
-                        errMsg += "\r\n" + pname + " (" + QString::number(entry.th32ProcessID) +
-                                "): OpenProcess fails with " + getLastErrorMsg();
-                    } else {
-                        qDebug() << LOGTAG << "handle opened";
-                        phandles.insert(entry.th32ProcessID, hProcess);
                         ppidnames.insert(entry.th32ProcessID, pname);
+                        this->pushPid(entry.th32ProcessID);
+                        break;
                     }
                 }
             }
@@ -109,7 +91,6 @@ HRESULT STDMETHODCALLTYPE CProcessMonitorExImpl::updateStatuses(void) {
 
         CloseHandle(snapshot);
     }
-
 
     return this->delegatePM->updateStatuses();
 }
@@ -176,6 +157,7 @@ HRESULT STDMETHODCALLTYPE CProcessMonitorExImpl::unregisterProcessByName(BSTR na
             iterator.next();
 
             if (iterator.value().compare(nameStr, Qt::CaseInsensitive) == 0) {
+                this->removePid(iterator.key());
                 iterator.remove();
             }
         }
@@ -195,6 +177,13 @@ HRESULT STDMETHODCALLTYPE CProcessMonitorExImpl::unregisterAllNames() {
     pnamesLock.unlock();
 
     ppidnamesLock.lock();
+
+    QMapIterator<unsigned int, QString> iterator(ppidnames);
+    while (iterator.hasNext()) {
+        iterator.next();
+        this->removePid(iterator.key());
+    }
+
     ppidnames.clear();
     ppidnamesLock.unlock();
     return S_OK;
@@ -203,27 +192,40 @@ HRESULT STDMETHODCALLTYPE CProcessMonitorExImpl::unregisterAllNames() {
 HRESULT STDMETHODCALLTYPE CProcessMonitorExImpl::getLastError(unsigned int *code,
                                                             LPBSTR msg,
                                                             unsigned int *msglen) {
-    // TODO
+    unsigned int lastError;
+    QString lastErrorMsg;
+
     lastErrorLock.lock();
 
-    if (code != NULL) {
-        *code = this->iLastError;
-    }
+    if (this->iLastError == 0) { // No error in extended component, use error data from parent
+        wchar_t *errorMsg;
+        unsigned int errorMsgLen;
 
-    if (msg != NULL && msglen != NULL) {
+        this->delegatePM->getLastError(&lastError, &errorMsg, &errorMsgLen);
+        lastErrorMsg = QString::fromWCharArray(errorMsg, errorMsgLen);
+    } else {
+        lastError = this->iLastError;
+
         errorsLock.lock();
-        QString qmsg = this->errors.value(this->iLastError, "Unknown error");
+        lastErrorMsg = this->errors.value(this->iLastError, "Unknown error");
 
-        if (lastErrorMsg.length() != 0) {
-            qmsg += " [" + lastErrorMsg + "]";
+        if (this->lastErrorMsg.length() != 0) {
+            lastErrorMsg += " [" + this->lastErrorMsg + "]";
         }
-
-        *msg = new wchar_t[qmsg.size()];
-        *msglen = qmsg.toWCharArray(*msg);
         errorsLock.unlock();
     }
 
     lastErrorLock.unlock();
+
+    if (code != NULL) {
+        *code = lastError;
+    }
+
+    if (msg != NULL && msglen != NULL) {
+        *msg = new wchar_t[lastErrorMsg.size()];
+        *msglen = lastErrorMsg.toWCharArray(*msg);
+    }
+
     return S_OK;
 }
 
