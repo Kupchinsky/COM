@@ -98,6 +98,9 @@ HRESULT STDMETHODCALLTYPE CProcessMonitorExImpl::Invoke(DISPID dispIdMember, REF
     } else if (QString::compare(name, "UnregisterAllNames", Qt::CaseInsensitive) == 0) {
         isBoolResult = true;
         result = this->unregisterAllNames();
+    } else if (QString::compare(name, "UpdateStatuses", Qt::CaseInsensitive) == 0) {
+        isBoolResult = true;
+        result = this->updateStatuses();
     } else {
         return this->delegateDisp->Invoke(dispIdMember, riid, lcid, wFlags, pDispParams,
                                           pVarResult, pExcepInfo, puArgErr);

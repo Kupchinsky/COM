@@ -66,6 +66,8 @@ HRESULT STDMETHODCALLTYPE CProcessMonitorExImpl::clearPids() {
 HRESULT STDMETHODCALLTYPE CProcessMonitorExImpl::updateStatuses(void) {
     setError(0);
 
+    pnamesLock.lock();
+
     // Check newly created processes
     if (pnames.size() != 0) {
         PROCESSENTRY32 entry;
@@ -79,7 +81,7 @@ HRESULT STDMETHODCALLTYPE CProcessMonitorExImpl::updateStatuses(void) {
 
                 foreach (QString name, pnames) {
                     if (name.compare(pname, Qt::CaseInsensitive) == 0) {
-                        qDebug() << LOGTAG << pname << "good";
+                        qDebug() << LOGTAG << pname << "matches";
 
                         ppidnames.insert(entry.th32ProcessID, pname);
                         this->pushPid(entry.th32ProcessID);
@@ -92,6 +94,7 @@ HRESULT STDMETHODCALLTYPE CProcessMonitorExImpl::updateStatuses(void) {
         CloseHandle(snapshot);
     }
 
+    pnamesLock.unlock();
     return this->delegatePM->updateStatuses();
 }
 
@@ -114,6 +117,8 @@ HRESULT STDMETHODCALLTYPE CProcessMonitorExImpl::getChangedStatusNext(unsigned i
 HRESULT STDMETHODCALLTYPE CProcessMonitorExImpl::registerProcessByName(BSTR name) {
     setError(0);
     QString nameStr = QString::fromWCharArray(name);
+
+    qDebug() << LOGTAG << "Registering" << nameStr;
 
     if (nameStr.length() == 0) {
         setError(206, "1");
@@ -138,6 +143,8 @@ HRESULT STDMETHODCALLTYPE CProcessMonitorExImpl::registerProcessByName(BSTR name
 HRESULT STDMETHODCALLTYPE CProcessMonitorExImpl::unregisterProcessByName(BSTR name) {
     setError(0);
     QString nameStr = QString::fromWCharArray(name);
+
+    qDebug() << LOGTAG << "Unregistering" << nameStr;
 
     if (nameStr.length() == 0) {
         setError(206, "1");
