@@ -12,16 +12,17 @@ TEMPLATE = lib
 DEFINES += SERVERDLLEXTEND_LIBRARY
 
 SOURCES += serverdllextend.cpp \
-    component_i.c \
-    compoinentdispimpl.cpp \
-    componentfactory.cpp \
-    componentimpl.cpp
+    componentex_i.c \
+    ../serverdll/component_i.c \
+    compoinentexdispimpl.cpp \
+    componenteximpl.cpp \
+    componentexfactory.cpp
 
 HEADERS += serverdllextend.h\
         serverdll-extend_global.h \
-    component.h \
-    componentfactory.h \
-    componentimpl.h
+    componentex.h \
+    componenteximpl.h \
+    componentexfactory.h
 
 unix {
     target.path = /usr/lib

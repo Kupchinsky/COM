@@ -110,8 +110,8 @@ HRESULT SERVERDLLEXTENDSHARED_EXPORT DllGetClassObject(REFCLSID rclsid, REFIID r
 
     *ppv = NULL;
 
-    if (rclsid == LIBID_ProcessManager) {
-        CProcessMonitorImplFactory *cf = new CProcessMonitorImplFactory();
+    if (rclsid == LIBID_ProcessManagerEx) {
+        CProcessMonitorExImplFactory *cf = new CProcessMonitorExImplFactory();
         return cf->QueryInterface(riid, ppv);
     }
 

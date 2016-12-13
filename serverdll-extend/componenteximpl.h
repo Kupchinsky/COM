@@ -1,7 +1,8 @@
 #ifndef COMPONENTIMPL_H
 #define COMPONENTIMPL_H
 
-#include "component.h"
+#include "componentex.h"
+#include "../serverdll/component.h"
 #include <QMap>
 #include <QList>
 #include <QPair>
@@ -9,10 +10,18 @@
 #include <QMapIterator>
 #include <QString>
 
-class CProcessMonitorImpl:
+class CProcessMonitorExImpl:
+        public IProcessMonitorExDispatch,
         public IProcessMonitorDisp,
+        public IProcessMonitorRegistrarEx,
         public IProcessMonitor,
         public IProcessMonitorRegistrar {
+    // Delegates
+    IDispatch *delegateDisp;
+    IProcessMonitor *delegatePM;
+    IProcessMonitorRegistrar *delegatePMR;
+    //
+
     // IUnknown related
     long lRefCount = 0;
 
@@ -27,22 +36,6 @@ class CProcessMonitorImpl:
 
     QMap<unsigned int, QString> errors;
     QMutex errorsLock;
-
-    QList<unsigned int> pids;
-    QMutex pidsLock;
-
-    QMap<unsigned int, QPair<unsigned int, QString>> statuses;
-    QMapIterator<unsigned int, QPair<unsigned int, QString>> *statusesIterator = NULL;
-    QMutex statusesLock;
-
-    QMap<unsigned int, unsigned int> oldStatuses;
-    QMutex oldStatusesLock;
-
-    QMap<unsigned int, HANDLE> phandles;
-    QMutex phandlesLock;
-
-    QMap<unsigned int, QString> ppidnames;
-    QMutex ppidnamesLock;
 
     void setError(unsigned int code, QString msg = "");
     QString getLastErrorMsg();
@@ -61,11 +54,12 @@ public:
                                      DISPPARAMS *pDispParams, VARIANT *pVarResult, EXCEPINFO *pExcepInfo,
                                      UINT *puArgErr);
 
-    // IProcessMonitor
+    // IProcessMonitorRegistrar
     HRESULT STDMETHODCALLTYPE pushPid(unsigned int pid);
     HRESULT STDMETHODCALLTYPE removePid(unsigned int pid);
     HRESULT STDMETHODCALLTYPE clearPids();
 
+    // IProcessMonitor
     HRESULT STDMETHODCALLTYPE updateStatuses(void);
 
     HRESULT STDMETHODCALLTYPE getChangedStatusFirst(unsigned int *pid,
@@ -78,41 +72,37 @@ public:
                                                    unsigned int *pnamelen,
                                                    unsigned int *status);
 
-    // Shared in IProcessMonitor/IProcessMonitorRegistrar
+    // IProcessMonitorRegistrarEx new part
+    HRESULT STDMETHODCALLTYPE registerProcessByName(BSTR name);
+    HRESULT STDMETHODCALLTYPE registerProcessByPid(unsigned int pid);
+    HRESULT STDMETHODCALLTYPE unregisterProcessByName(BSTR name);
+    HRESULT STDMETHODCALLTYPE unregisterProcessByPid(unsigned int pid);
+    HRESULT STDMETHODCALLTYPE unregisterAllProcesses();
+
+    // Shared in IProcessMonitor/IProcessMonitorRegistrar/IProcessMonitorRegistrarEx
     HRESULT STDMETHODCALLTYPE getLastError(unsigned int *code,
                                            LPBSTR msg,
                                            unsigned int *msglen);
 
-    CProcessMonitorImpl() {
+    CProcessMonitorExImpl() {
         errorsLock.lock();
         errors[0] = "No error";
-        errors[101] = "Process with this pid not found";
-        errors[102] = "Process with this pid not registered";
-        errors[103] = "Process with same pid already registered";
-        errors[104] = "Empty parameter";
-        errors[105] = "Something went wrong";
+        // TODO
         errorsLock.unlock();
 
         dispIdNamesLock.lock();
-        dispIdNames.insert("LastError", 1);
-        dispIdNames.insert("LastErrorMsg", 2);
-        dispIdNames.insert("pushPid", 3);
-        dispIdNames.insert("removePid", 4);
-        dispIdNames.insert("clearPids", 5);
-        dispIdNames.insert("updateStatuses", 6);
-        dispIdNames.insert("getChangedStatusFirst", 7);
-        dispIdNames.insert("getChangedStatusNext", 8);
+        dispIdNames.insert("RegisterProcessByName", 12);
+        dispIdNames.insert("RegisterProcessByPid", 13);
+        dispIdNames.insert("UnregisterProcessByName", 14);
+        dispIdNames.insert("UnregisterProcessByPid", 15);
+        dispIdNames.insert("UnregisterAllProcesses", 16);
         dispIdNamesLock.unlock();
     }
 
-    virtual ~CProcessMonitorImpl() {
-        if (statusesIterator != NULL) {
-            delete statusesIterator;
-            statusesIterator = NULL;
-        }
-
-        // Close handles
-        this->clearPids();
+    virtual ~CProcessMonitorExImpl() {
+        this->delegateDisp->Release();
+        this->delegatePM->Release();
+        this->delegatePMR->Release();
     }
 };
 #endif // COMPONENTIMPL_H

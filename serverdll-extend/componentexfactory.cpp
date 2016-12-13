@@ -1,4 +1,4 @@
-#include "componentfactory.h"
+#include "componentexfactory.h"
 #include "serverdllextend.h"
 
 HRESULT STDMETHODCALLTYPE CProcessMonitorExImplFactory::QueryInterface(REFIID riid, void **ppvObject) {

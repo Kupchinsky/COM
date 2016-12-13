@@ -30,25 +30,26 @@ dispinterface IProcessMonitorExDispatch
 properties:
     [id(1)] unsigned int LastError;
     [id(2)] BSTR LastErrorMsg;
+
     [id(3)] unsigned int StatusPid;
     [id(4)] BSTR StatusPname;
     [id(5)] unsigned int Status;
 
 methods:
-    [id(6)] HRESULT RegisterProcessByName(BSTR name);
-    [id(7)] HRESULT RegisterProcessByPid(unsigned int pid);
+    [id(6)] HRESULT PushPid(unsigned int pid);
+    [id(7)] HRESULT RemovePid(unsigned int pid);
+    [id(8)] HRESULT ClearPids();
 
-    [id(8)] HRESULT UnregisterProcessByName(BSTR name);
-    [id(9)] HRESULT UnregisterProcessByPid(unsigned int pid);
-    [id(10)] HRESULT UnregisterAllProcesses();
+    [id(9)] HRESULT UpdateStatuses();
+    [id(10)] HRESULT GetChangedStatusFirst();
+	[id(11)] HRESULT GetChangedStatusNext();
 
-    [id(11)] HRESULT PushPid(unsigned int pid);
-    [id(12)] HRESULT RemovePid(unsigned int pid);
-    [id(13)] HRESULT ClearPids();
+    [id(12)] HRESULT RegisterProcessByName(BSTR name);
+    [id(13)] HRESULT RegisterProcessByPid(unsigned int pid);
 
-    [id(14)] HRESULT UpdateStatuses();
-    [id(15)] HRESULT GetChangedStatusFirst();
-	[id(16)] HRESULT GetChangedStatusNext();
+    [id(14)] HRESULT UnregisterProcessByName(BSTR name);
+    [id(15)] HRESULT UnregisterProcessByPid(unsigned int pid);
+    [id(16)] HRESULT UnregisterAllProcesses();
 };
 
 [

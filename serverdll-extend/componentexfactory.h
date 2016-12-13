@@ -1,8 +1,8 @@
 #ifndef CPROCESSMONITORIMPLFACTORY_H
 #define CPROCESSMONITORIMPLFACTORY_H
 
-#include "component.h"
-#include "componentimpl.h"
+#include "componentex.h"
+#include "componenteximpl.h"
 
 class CProcessMonitorExImplFactory: public IClassFactory
 {
@@ -15,7 +15,7 @@ public:
     HRESULT STDMETHODCALLTYPE CreateInstance(IUnknown* pUnknownOuter, const IID& iid, void** ppv);
     HRESULT STDMETHODCALLTYPE LockServer(BOOL bLock);
 
-    virtual ~CProcessMonitorImplFactory() {
+    virtual ~CProcessMonitorExImplFactory() {
     }
 };
 

@@ -68,11 +68,12 @@ public:
                                      DISPPARAMS *pDispParams, VARIANT *pVarResult, EXCEPINFO *pExcepInfo,
                                      UINT *puArgErr);
 
-    // IProcessMonitor
+    // IProcessMonitorRegistrar
     HRESULT STDMETHODCALLTYPE pushPid(unsigned int pid);
     HRESULT STDMETHODCALLTYPE removePid(unsigned int pid);
     HRESULT STDMETHODCALLTYPE clearPids();
 
+    // IProcessMonitor
     HRESULT STDMETHODCALLTYPE updateStatuses(void);
 
     HRESULT STDMETHODCALLTYPE getChangedStatusFirst(unsigned int *pid,

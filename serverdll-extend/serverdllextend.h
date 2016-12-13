@@ -1,9 +1,9 @@
 #ifndef SERVERDLLEXTEND_H
 #define SERVERDLLEXTEND_H
 
-#include "component.h"
-#include "componentimpl.h"
-#include "componentfactory.h"
+#include "componentex.h"
+#include "componenteximpl.h"
+#include "componentexfactory.h"
 #include "serverdll-extend_global.h"
 
 #include <windows.h>
