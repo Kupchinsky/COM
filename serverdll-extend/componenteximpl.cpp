@@ -1,5 +1,8 @@
 #include "componenteximpl.h"
 #include "serverdllextend.h"
+#include <tlhelp32.h>
+#include <psapi.h>
+#include <QDebug>
 
 HRESULT STDMETHODCALLTYPE CProcessMonitorExImpl::QueryInterface(REFIID riid, void **ppvObject) {
     if (riid == IID_IUnknown) {
@@ -18,7 +21,7 @@ HRESULT STDMETHODCALLTYPE CProcessMonitorExImpl::QueryInterface(REFIID riid, voi
         *ppvObject = static_cast<IProcessMonitorRegistrar*>(this);
         this->AddRef();
         return S_OK;
-    } else if (riid == IProcessMonitorRegistrarEx) {
+    } else if (riid == IID_IProcessMonitorRegistrarEx) {
         *ppvObject = static_cast<IProcessMonitorRegistrarEx*>(this);
         this->AddRef();
         return S_OK;
@@ -62,6 +65,52 @@ HRESULT STDMETHODCALLTYPE CProcessMonitorExImpl::clearPids() {
 
 HRESULT STDMETHODCALLTYPE CProcessMonitorExImpl::updateStatuses(void) {
     setError(0);
+
+    // TODO: update names
+    // Check newly created processes
+    if (pnames.size() != 0) {
+        PROCESSENTRY32 entry;
+        entry.dwSize = sizeof(PROCESSENTRY32);
+
+        HANDLE snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+
+        if (Process32First(snapshot, &entry) == TRUE) {
+            while (Process32Next(snapshot, &entry) == TRUE) {
+                if (phandles.contains(entry.th32ProcessID)) {
+                    continue;
+                }
+
+                bool openHandle = false;
+                QString pname = QString::fromWCharArray(entry.szExeFile);
+
+                foreach (QString name, pnames) {
+                    if (name.compare(pname, Qt::CaseInsensitive) == 0) {
+                        qDebug() << LOGTAG << pname << "good";
+
+                        openHandle = true;
+                        break;
+                    }
+                }
+
+                if (openHandle) {
+                    HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, entry.th32ProcessID);
+
+                    if (hProcess == NULL) {
+                        errMsg += "\r\n" + pname + " (" + QString::number(entry.th32ProcessID) +
+                                "): OpenProcess fails with " + getLastErrorMsg();
+                    } else {
+                        qDebug() << LOGTAG << "handle opened";
+                        phandles.insert(entry.th32ProcessID, hProcess);
+                        ppidnames.insert(entry.th32ProcessID, pname);
+                    }
+                }
+            }
+        }
+
+        CloseHandle(snapshot);
+    }
+
+
     return this->delegatePM->updateStatuses();
 }
 
@@ -82,28 +131,79 @@ HRESULT STDMETHODCALLTYPE CProcessMonitorExImpl::getChangedStatusNext(unsigned i
 }
 
 HRESULT STDMETHODCALLTYPE CProcessMonitorExImpl::registerProcessByName(BSTR name) {
+    setError(0);
+    QString nameStr = QString::fromWCharArray(name);
 
-}
+    if (nameStr.length() == 0) {
+        setError(206, "1");
+        return S_FALSE;
+    }
 
-HRESULT STDMETHODCALLTYPE CProcessMonitorExImpl::registerProcessByPid(unsigned int pid) {
+    pnamesLock.lock();
 
+    HRESULT result = S_OK;
+
+    if (pnames.contains(nameStr)) {
+        setError(204);
+        result = S_FALSE;
+    } else {
+        pnames.push_back(nameStr);
+    }
+
+    pnamesLock.unlock();
+    return result;
 }
 
 HRESULT STDMETHODCALLTYPE CProcessMonitorExImpl::unregisterProcessByName(BSTR name) {
+    setError(0);
+    QString nameStr = QString::fromWCharArray(name);
 
+    if (nameStr.length() == 0) {
+        setError(206, "1");
+        return S_FALSE;
+    }
+
+    pnamesLock.lock();
+
+    HRESULT result = S_OK;
+
+    if (pnames.contains(nameStr)) {
+        pnames.removeOne(nameStr);
+
+        ppidnamesLock.lock();
+        QMutableMapIterator<unsigned int, QString> iterator(ppidnames);
+        while (iterator.hasNext()) {
+            iterator.next();
+
+            if (iterator.value().compare(nameStr, Qt::CaseInsensitive) == 0) {
+                iterator.remove();
+            }
+        }
+        ppidnamesLock.unlock();
+    } else {
+        setError(203);
+        result = S_FALSE;
+    }
+
+    pnamesLock.unlock();
+    return result;
 }
 
-HRESULT STDMETHODCALLTYPE CProcessMonitorExImpl::unregisterProcessByPid(unsigned int pid) {
+HRESULT STDMETHODCALLTYPE CProcessMonitorExImpl::unregisterAllNames() {
+    pnamesLock.lock();
+    pnames.clear();
+    pnamesLock.unlock();
 
-}
-
-HRESULT STDMETHODCALLTYPE CProcessMonitorExImpl::unregisterAllProcesses() {
-
+    ppidnamesLock.lock();
+    ppidnames.clear();
+    ppidnamesLock.unlock();
+    return S_OK;
 }
 
 HRESULT STDMETHODCALLTYPE CProcessMonitorExImpl::getLastError(unsigned int *code,
                                                             LPBSTR msg,
                                                             unsigned int *msglen) {
+    // TODO
     lastErrorLock.lock();
 
     if (code != NULL) {

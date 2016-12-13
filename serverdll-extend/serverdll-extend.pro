@@ -29,8 +29,8 @@ unix {
     INSTALLS += target
 }
 
-Release:QMAKE_LINK = windres ../${QMAKE_TARGET}/rsrc.rc -o release/rsrc.o && dlltool -e release/exports.o --kill-at release/serverdll.o && g++
-Debug:QMAKE_LINK = windres ../${QMAKE_TARGET}/rsrc.rc -o debug/rsrc.o && dlltool -e debug/exports.o --kill-at debug/serverdll.o && g++
+Release:QMAKE_LINK = windres ../${QMAKE_TARGET}/rsrc.rc -o release/rsrc.o && dlltool -e release/exports.o --kill-at release/serverdllextend.o && g++
+Debug:QMAKE_LINK = windres ../${QMAKE_TARGET}/rsrc.rc -o debug/rsrc.o && dlltool -e debug/exports.o --kill-at debug/serverdllextend.o && g++
 
 Release:LIBS += release/exports.o
 Release:LIBS += release/rsrc.o

@@ -4,7 +4,7 @@
 
 
  /* File created by MIDL compiler version 8.00.0603 */
-/* at Tue Dec 13 20:35:09 2016
+/* at Tue Dec 13 22:02:27 2016
  */
 /* Compiler settings for componentex.idl:
     Oicf, W1, Zp8, env=Win32 (32b run), target_arch=X86 8.00.0603 
@@ -101,16 +101,10 @@ EXTERN_C const IID IID_IProcessMonitorRegistrarEx;
         virtual /* [id] */ HRESULT STDMETHODCALLTYPE registerProcessByName( 
             BSTR name) = 0;
         
-        virtual /* [id] */ HRESULT STDMETHODCALLTYPE registerProcessByPid( 
-            unsigned int pid) = 0;
-        
         virtual /* [id] */ HRESULT STDMETHODCALLTYPE unregisterProcessByName( 
             BSTR name) = 0;
         
-        virtual /* [id] */ HRESULT STDMETHODCALLTYPE unregisterProcessByPid( 
-            unsigned int pid) = 0;
-        
-        virtual /* [id] */ HRESULT STDMETHODCALLTYPE unregisterAllProcesses( void) = 0;
+        virtual /* [id] */ HRESULT STDMETHODCALLTYPE unregisterAllNames( void) = 0;
         
         virtual /* [id] */ HRESULT STDMETHODCALLTYPE pushPid( 
             unsigned int pid) = 0;
@@ -187,19 +181,11 @@ EXTERN_C const IID IID_IProcessMonitorRegistrarEx;
             IProcessMonitorRegistrarEx * This,
             BSTR name);
         
-        /* [id] */ HRESULT ( STDMETHODCALLTYPE *registerProcessByPid )( 
-            IProcessMonitorRegistrarEx * This,
-            unsigned int pid);
-        
         /* [id] */ HRESULT ( STDMETHODCALLTYPE *unregisterProcessByName )( 
             IProcessMonitorRegistrarEx * This,
             BSTR name);
         
-        /* [id] */ HRESULT ( STDMETHODCALLTYPE *unregisterProcessByPid )( 
-            IProcessMonitorRegistrarEx * This,
-            unsigned int pid);
-        
-        /* [id] */ HRESULT ( STDMETHODCALLTYPE *unregisterAllProcesses )( 
+        /* [id] */ HRESULT ( STDMETHODCALLTYPE *unregisterAllNames )( 
             IProcessMonitorRegistrarEx * This);
         
         /* [id] */ HRESULT ( STDMETHODCALLTYPE *pushPid )( 
@@ -258,17 +244,11 @@ EXTERN_C const IID IID_IProcessMonitorRegistrarEx;
 #define IProcessMonitorRegistrarEx_registerProcessByName(This,name)	\
     ( (This)->lpVtbl -> registerProcessByName(This,name) ) 
 
-#define IProcessMonitorRegistrarEx_registerProcessByPid(This,pid)	\
-    ( (This)->lpVtbl -> registerProcessByPid(This,pid) ) 
-
 #define IProcessMonitorRegistrarEx_unregisterProcessByName(This,name)	\
     ( (This)->lpVtbl -> unregisterProcessByName(This,name) ) 
 
-#define IProcessMonitorRegistrarEx_unregisterProcessByPid(This,pid)	\
-    ( (This)->lpVtbl -> unregisterProcessByPid(This,pid) ) 
-
-#define IProcessMonitorRegistrarEx_unregisterAllProcesses(This)	\
-    ( (This)->lpVtbl -> unregisterAllProcesses(This) ) 
+#define IProcessMonitorRegistrarEx_unregisterAllNames(This)	\
+    ( (This)->lpVtbl -> unregisterAllNames(This) ) 
 
 #define IProcessMonitorRegistrarEx_pushPid(This,pid)	\
     ( (This)->lpVtbl -> pushPid(This,pid) ) 

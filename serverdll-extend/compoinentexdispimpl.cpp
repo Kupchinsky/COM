@@ -71,6 +71,33 @@ HRESULT STDMETHODCALLTYPE CProcessMonitorExImpl::Invoke(DISPID dispIdMember, REF
         pVarResult->vt = VT_BSTR;
         pVarResult->bstrVal = SysAllocString(this->lastErrorMsg.toStdWString().c_str());
         lastErrorLock.unlock();
+    } else if (QString::compare(name, "RegisterProcessByName", Qt::CaseInsensitive) == 0) {
+        DISPPARAMS param = *pDispParams;
+        VARIANT arg1 = (param.rgvarg)[0];
+        HRESULT res = VariantChangeType(&arg1, &arg1, 0, VT_BSTR);
+
+        if (res != S_OK) {
+            *puArgErr = 1;
+            this->setError(206, "1");
+        } else {
+            isBoolResult = true;
+            result = this->registerProcessByName(arg1.bstrVal);
+        }
+    } else if (QString::compare(name, "UnregisterProcessByName", Qt::CaseInsensitive) == 0) {
+        DISPPARAMS param = *pDispParams;
+        VARIANT arg1 = (param.rgvarg)[0];
+        HRESULT res = VariantChangeType(&arg1, &arg1, 0, VT_BSTR);
+
+        if (res != S_OK) {
+            *puArgErr = 1;
+            this->setError(206, "1");
+        } else {
+            isBoolResult = true;
+            result = this->unregisterProcessByName(arg1.bstrVal);
+        }
+    } else if (QString::compare(name, "UnregisterAllNames", Qt::CaseInsensitive) == 0) {
+        isBoolResult = true;
+        result = this->unregisterAllNames();
     } else {
         return this->delegateDisp->Invoke(dispIdMember, riid, lcid, wFlags, pDispParams,
                                           pVarResult, pExcepInfo, puArgErr);

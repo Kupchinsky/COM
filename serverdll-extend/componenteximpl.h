@@ -5,10 +5,10 @@
 #include "../serverdll/component.h"
 #include <QMap>
 #include <QList>
-#include <QPair>
 #include <QMutex>
-#include <QMapIterator>
 #include <QString>
+
+#define LOGTAG "CProcessMonitorExImpl >>"
 
 class CProcessMonitorExImpl:
         public IProcessMonitorExDispatch,
@@ -36,6 +36,12 @@ class CProcessMonitorExImpl:
 
     QMap<unsigned int, QString> errors;
     QMutex errorsLock;
+
+    QList<QString> pnames;
+    QMutex pnamesLock;
+
+    QMap<unsigned int, QString> ppidnames;
+    QMutex ppidnamesLock;
 
     void setError(unsigned int code, QString msg = "");
     QString getLastErrorMsg();
@@ -74,10 +80,8 @@ public:
 
     // IProcessMonitorRegistrarEx new part
     HRESULT STDMETHODCALLTYPE registerProcessByName(BSTR name);
-    HRESULT STDMETHODCALLTYPE registerProcessByPid(unsigned int pid);
     HRESULT STDMETHODCALLTYPE unregisterProcessByName(BSTR name);
-    HRESULT STDMETHODCALLTYPE unregisterProcessByPid(unsigned int pid);
-    HRESULT STDMETHODCALLTYPE unregisterAllProcesses();
+    HRESULT STDMETHODCALLTYPE unregisterAllNames();
 
     // Shared in IProcessMonitor/IProcessMonitorRegistrar/IProcessMonitorRegistrarEx
     HRESULT STDMETHODCALLTYPE getLastError(unsigned int *code,
@@ -87,15 +91,16 @@ public:
     CProcessMonitorExImpl() {
         errorsLock.lock();
         errors[0] = "No error";
-        // TODO
+        errors[203] = "This process name pattern isn't registered";
+        errors[204] = "Process with same pid already registered";
+        errors[205] = "This process name pattern is already registered";
+        errors[206] = "Empty parameter";
         errorsLock.unlock();
 
         dispIdNamesLock.lock();
         dispIdNames.insert("RegisterProcessByName", 12);
-        dispIdNames.insert("RegisterProcessByPid", 13);
-        dispIdNames.insert("UnregisterProcessByName", 14);
-        dispIdNames.insert("UnregisterProcessByPid", 15);
-        dispIdNames.insert("UnregisterAllProcesses", 16);
+        dispIdNames.insert("UnregisterProcessByName", 13);
+        dispIdNames.insert("UnregisterAllNames", 14);
         dispIdNamesLock.unlock();
     }
 

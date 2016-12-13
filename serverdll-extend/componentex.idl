@@ -9,17 +9,14 @@ version(1.0)
 interface IProcessMonitorRegistrarEx: IDispatch
 {
     [id(1)] HRESULT registerProcessByName(BSTR name);
-    [id(2)] HRESULT registerProcessByPid(unsigned int pid);
+    [id(2)] HRESULT unregisterProcessByName(BSTR name);
+    [id(3)] HRESULT unregisterAllNames();
 
-    [id(3)] HRESULT unregisterProcessByName(BSTR name);
-    [id(4)] HRESULT unregisterProcessByPid(unsigned int pid);
-    [id(5)] HRESULT unregisterAllProcesses();
+    [id(4)] HRESULT pushPid(unsigned int pid);
+    [id(5)] HRESULT removePid(unsigned int pid);
+    [id(6)] HRESULT clearPids();
 
-    [id(6)] HRESULT pushPid(unsigned int pid);
-    [id(7)] HRESULT removePid(unsigned int pid);
-    [id(8)] HRESULT clearPids();
-
-    [id(9)] HRESULT getLastError([out] unsigned int *code, [out, size_is(, *msglen)] LPBSTR msg, [out] unsigned int *msglen);
+    [id(7)] HRESULT getLastError([out] unsigned int *code, [out, size_is(, *msglen)] LPBSTR msg, [out] unsigned int *msglen);
 }
 
 [
@@ -45,11 +42,9 @@ methods:
 	[id(11)] HRESULT GetChangedStatusNext();
 
     [id(12)] HRESULT RegisterProcessByName(BSTR name);
-    [id(13)] HRESULT RegisterProcessByPid(unsigned int pid);
 
-    [id(14)] HRESULT UnregisterProcessByName(BSTR name);
-    [id(15)] HRESULT UnregisterProcessByPid(unsigned int pid);
-    [id(16)] HRESULT UnregisterAllProcesses();
+    [id(13)] HRESULT UnregisterProcessByName(BSTR name);
+    [id(14)] HRESULT UnregisterAllNames();
 };
 
 [
