@@ -4,10 +4,7 @@
 #include "component.h"
 #include "componentimpl.h"
 
-#undef LOGTAG
-#define LOGTAG "CProcessMonitorImplFactory >>"
-
-class CProcessMonitorImplFactory: public IClassFactory
+class CProcessMonitorExImplFactory: public IClassFactory
 {
     long lRefCount = 0;
 public:

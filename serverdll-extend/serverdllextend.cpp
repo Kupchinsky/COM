@@ -1,4 +1,4 @@
-#include "serverdll.h"
+#include "serverdllextend.h"
 #include <windows.h>
 #include <QString>
 
@@ -34,7 +34,7 @@ BOOL HelperWriteKey(HKEY roothk, const char *lpSubKey, LPCSTR val_name, DWORD dw
     return TRUE;
 }
 
-HRESULT SERVERDLLSHARED_EXPORT DllRegisterServer() {
+HRESULT SERVERDLLEXTENDSHARED_EXPORT DllRegisterServer() {
     WCHAR *lpwszClsid;
 
     char szBuff[MAX_PATH];
@@ -43,7 +43,7 @@ HRESULT SERVERDLLSHARED_EXPORT DllRegisterServer() {
     char szProgId[MAX_PATH];
     char szDescriptionVal[256];
 
-    StringFromCLSID(LIBID_ProcessManager, &lpwszClsid);
+    StringFromCLSID(LIBID_ProcessManagerEx, &lpwszClsid);
 
     sprintf(szClsid, "%S", lpwszClsid);
     sprintf(szInproc, "%s\\%s\\%s", "CLSID", szClsid, "InprocServer32");
@@ -66,7 +66,7 @@ HRESULT SERVERDLLSHARED_EXPORT DllRegisterServer() {
         return 0;
     }
 
-    sprintf(szBuff, "%s", "Process Manager");
+    sprintf(szBuff, "%s", "Process Manager (Extended)");
     if (HelperWriteKey(HKEY_CLASSES_ROOT, ProgId, NULL, REG_SZ, (void*)szBuff, strlen(szBuff)) == FALSE) {
         return 0;
     }
@@ -79,7 +79,7 @@ HRESULT SERVERDLLSHARED_EXPORT DllRegisterServer() {
     return 1;
 }
 
-HRESULT SERVERDLLSHARED_EXPORT DllUnregisterServer() {
+HRESULT SERVERDLLEXTENDSHARED_EXPORT DllUnregisterServer() {
 
     char szKeyName[256];
     char szClsid[256];
@@ -103,7 +103,7 @@ HRESULT SERVERDLLSHARED_EXPORT DllUnregisterServer() {
     return 1;
 }
 
-HRESULT SERVERDLLSHARED_EXPORT DllGetClassObject(REFCLSID rclsid, REFIID riid, void **ppv) {
+HRESULT SERVERDLLEXTENDSHARED_EXPORT DllGetClassObject(REFCLSID rclsid, REFIID riid, void **ppv) {
     if (!ppv) {
         return E_INVALIDARG;
     }
@@ -118,6 +118,6 @@ HRESULT SERVERDLLSHARED_EXPORT DllGetClassObject(REFCLSID rclsid, REFIID riid, v
     return CLASS_E_CLASSNOTAVAILABLE;
 }
 
-HRESULT SERVERDLLSHARED_EXPORT DllCanUnloadNow() {
+HRESULT SERVERDLLEXTENDSHARED_EXPORT DllCanUnloadNow() {
     return g_ObjectsInUse == 0 ? S_OK : S_FALSE;
 }

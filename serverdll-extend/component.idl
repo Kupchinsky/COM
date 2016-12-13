@@ -6,7 +6,7 @@ import "ocidl.idl";
 uuid(2044b06d-c185-4e6e-a4c2-078a5b6f9ed0),
 version(1.0)
 ]
-interface IProcessMonitorRegistrarEx: IUnknown
+interface IProcessMonitorRegistrarEx: IDispatch
 {
     [id(1)] HRESULT registerProcessByName(BSTR name);
     [id(2)] HRESULT registerProcessByPid(unsigned int pid);
@@ -15,25 +15,40 @@ interface IProcessMonitorRegistrarEx: IUnknown
     [id(4)] HRESULT unregisterProcessByPid(unsigned int pid);
     [id(5)] HRESULT unregisterAllProcesses();
 
-    [id(6)] HRESULT getLastError([out] unsigned int *code, [out, size_is(, *msglen)] LPBSTR msg, [out] unsigned int *msglen);
+    [id(6)] HRESULT pushPid(unsigned int pid);
+    [id(7)] HRESULT removePid(unsigned int pid);
+    [id(8)] HRESULT clearPids();
+
+    [id(9)] HRESULT getLastError([out] unsigned int *code, [out, size_is(, *msglen)] LPBSTR msg, [out] unsigned int *msglen);
 }
 
 [
 uuid(2044b06d-c185-4e6e-a4c2-078a5b6f9ed1)
 ]
-dispinterface IProcessMonitorRegistrarExDispatch
+dispinterface IProcessMonitorExDispatch
 {
 properties:
     [id(1)] unsigned int LastError;
     [id(2)] BSTR LastErrorMsg;
+    [id(3)] unsigned int StatusPid;
+    [id(4)] BSTR StatusPname;
+    [id(5)] unsigned int Status;
 
 methods:
-    [id(3)] HRESULT RegisterProcessByName(BSTR name);
-    [id(4)] HRESULT RegisterProcessByPid(unsigned int pid);
+    [id(6)] HRESULT RegisterProcessByName(BSTR name);
+    [id(7)] HRESULT RegisterProcessByPid(unsigned int pid);
 
-    [id(5)] HRESULT UnregisterProcessByName(BSTR name);
-    [id(6)] HRESULT UnregisterProcessByPid(unsigned int pid);
-    [id(7)] HRESULT UnregisterAllProcesses();
+    [id(8)] HRESULT UnregisterProcessByName(BSTR name);
+    [id(9)] HRESULT UnregisterProcessByPid(unsigned int pid);
+    [id(10)] HRESULT UnregisterAllProcesses();
+
+    [id(11)] HRESULT PushPid(unsigned int pid);
+    [id(12)] HRESULT RemovePid(unsigned int pid);
+    [id(13)] HRESULT ClearPids();
+
+    [id(14)] HRESULT UpdateStatuses();
+    [id(15)] HRESULT GetChangedStatusFirst();
+	[id(16)] HRESULT GetChangedStatusNext();
 };
 
 [
@@ -46,5 +61,5 @@ library ProcessManagerEx
 	importlib("stdole2.tlb");
 
 	interface IProcessMonitorRegistrarEx;
-	dispinterface IProcessMonitorRegistrarExDispatch;
+	dispinterface IProcessMonitorExDispatch;
 }

@@ -21,14 +21,21 @@ HRESULT STDMETHODCALLTYPE CProcessMonitorImpl::GetIDsOfNames(REFIID riid, LPOLES
     }
 
     QString name = QString::fromWCharArray(rgszNames[0]);
-    HRESULT result = S_OK;
+    HRESULT result = E_NOTIMPL;
 
     dispIdNamesLock.lock();
 
-    if (dispIdNames.contains(name)) {
-        rgDispId[0] = dispIdNames[name];
-    } else {
-        result = E_NOTIMPL;
+    QMapIterator<QString, DISPID> iterator(dispIdNames);
+
+    while (iterator.hasNext()) {
+        iterator.next();
+
+        if (QString::compare(iterator.key(), name, Qt::CaseInsensitive) == 0) {
+            rgDispId[0] = iterator.value();
+            result = S_OK;
+
+            break;
+        }
     }
 
     dispIdNamesLock.unlock();
@@ -46,52 +53,99 @@ HRESULT STDMETHODCALLTYPE CProcessMonitorImpl::Invoke(DISPID dispIdMember, REFII
     QString name = dispIdNames.key(dispIdMember, "");
     dispIdNamesLock.unlock();
 
-    if (name == "LastError" && wFlags == DISPATCH_PROPERTYGET) {
+    bool isBoolResult = false;
+    HRESULT result;
+
+    if (QString::compare(name, "LastError", Qt::CaseInsensitive) == 0) {
         lastErrorLock.lock();
-        pVarResult->vt = VT_INT;
-        pVarResult->intVal = this->iLastError;
+        pVarResult->vt = VT_I2;
+        pVarResult->iVal = this->iLastError;
         lastErrorLock.unlock();
-    } else if (name == "LastErrorMsg" && wFlags == DISPATCH_PROPERTYGET) {
+    } else if (QString::compare(name, "LastErrorMsg", Qt::CaseInsensitive) == 0) {
         lastErrorLock.lock();
         pVarResult->vt = VT_BSTR;
-
-        const wchar_t *cbstr = this->lastErrorMsg.toStdWString().c_str();
-        wchar_t *bstr = wcsdup(cbstr);
-
-        pVarResult->bstrVal = bstr;
+        pVarResult->bstrVal = SysAllocString(this->lastErrorMsg.toStdWString().c_str());
         lastErrorLock.unlock();
-    } else if (name == "pushPid") {
+    } else if (QString::compare(name, "StatusPid", Qt::CaseInsensitive) == 0) {
+        if (pVarResult != NULL) {
+            dispCurrentStatusLock.lock();
+            pVarResult->vt = VT_I2;
+            pVarResult->iVal = this->dispCurrentStatusPid;
+            dispCurrentStatusLock.unlock();
+        }
+    } else if (QString::compare(name, "StatusPname", Qt::CaseInsensitive) == 0) {
+        dispCurrentStatusLock.lock();
+        pVarResult->vt = VT_BSTR;
+        pVarResult->bstrVal = SysAllocString(this->dispCurrentStatusPname.toStdWString().c_str());
+        dispCurrentStatusLock.unlock();
+    } else if (QString::compare(name, "Status", Qt::CaseInsensitive) == 0) {
+        if (pVarResult != NULL) {
+            dispCurrentStatusLock.lock();
+            pVarResult->vt = VT_I2;
+            pVarResult->iVal = this->dispCurrentStatus;
+            dispCurrentStatusLock.unlock();
+        }
+    } else if (QString::compare(name, "pushPid", Qt::CaseInsensitive) == 0) {
         DISPPARAMS param = *pDispParams;
         VARIANT arg1 = (param.rgvarg)[0];
         HRESULT res = VariantChangeType(&arg1, &arg1, 0, VT_UINT);
 
         if (res != S_OK) {
-            // TODO: generate exception
             *puArgErr = 1;
+            this->setError(106, "1");
+        } else {
+            isBoolResult = true;
+            result = this->pushPid(arg1.uintVal);
         }
-
-        this->pushPid(arg1.uintVal);
-    } else if (name == "removePid") {
+    } else if (QString::compare(name, "removePid", Qt::CaseInsensitive) == 0) {
         DISPPARAMS param = *pDispParams;
         VARIANT arg1 = (param.rgvarg)[0];
         HRESULT res = VariantChangeType(&arg1, &arg1, 0, VT_UINT);
 
         if (res != S_OK) {
-            // TODO: generate exception
             *puArgErr = 1;
+            this->setError(106, "1");
+        } else {
+            isBoolResult = true;
+            result = this->removePid(arg1.uintVal);
         }
+    } else if (QString::compare(name, "clearPids", Qt::CaseInsensitive) == 0) {
+        isBoolResult = true;
+        result = this->clearPids();
+    } else if (QString::compare(name, "updateStatuses", Qt::CaseInsensitive) == 0) {
+        isBoolResult = true;
+        result = this->updateStatuses();
+    } else if (QString::compare(name, "getChangedStatusFirst", Qt::CaseInsensitive) == 0) {
+        isBoolResult = true;
+        wchar_t *pname;
+        unsigned int pnameLen;
 
-        this->removePid(arg1.uintVal);
-    } else if (name == "clearPids") {
-        this->clearPids();
-    } else if (name == "updateStatuses") {
-        this->updateStatuses();
-    } else if (name == "getChangedStatusFirst") {
-        // TODO
-    } else if (name == "getChangedStatusNext") {
-        // TODO
+        result = this->getChangedStatusFirst(&this->dispCurrentStatusPid,
+                                             &pname, &pnameLen,
+                                             &this->dispCurrentStatus);
+
+        if (result == S_OK) {
+            this->dispCurrentStatusPname = QString::fromWCharArray(pname, pnameLen);
+        }
+    } else if (QString::compare(name, "getChangedStatusNext", Qt::CaseInsensitive) == 0) {
+        isBoolResult = true;
+        wchar_t *pname;
+        unsigned int pnameLen;
+
+        result = this->getChangedStatusNext(&this->dispCurrentStatusPid,
+                                             &pname, &pnameLen,
+                                             &this->dispCurrentStatus);
+
+        if (result == S_OK) {
+            this->dispCurrentStatusPname = QString::fromWCharArray(pname, pnameLen);
+        }
     } else {
         return E_NOTIMPL;
+    }
+
+    if (isBoolResult && pVarResult != NULL) {
+        pVarResult->vt = VT_BOOL;
+        pVarResult->boolVal = result == S_OK ? VARIANT_TRUE : VARIANT_FALSE;
     }
 
     return S_OK;

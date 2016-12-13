@@ -18,7 +18,7 @@ void thrd_waitkey() {
 }
 
 void print_status(unsigned int pid, QString pname, unsigned int status) {
-    qDebug() << pname << "(" + QString::number(pid) + ")" << "Status: " +  QString::number(status);
+    qDebug() << pname << "(" + QString::number(pid) + ", " + pname + ")" << "Status: " +  QString::number(status);
 }
 
 int main(int argc, char **argv)
@@ -37,10 +37,14 @@ int main(int argc, char **argv)
 
     qDebug() << "[IProcessMonitorRegistrar] Registering by pids...";
 
-    QVector<unsigned int> processes;
-    //processes.push_back();
+    QTextStream qtin(stdin);
+    unsigned int count;
+    qtin >> count;
 
-    foreach (unsigned int pid, processes) {
+    for (unsigned int i = 1; i <= count; i++) {
+        unsigned int pid;
+        qtin >> pid;
+
         qDebug() << "[IProcessMonitorRegistrar] Registering" << pid << "by pid";
 
         if (iPMR->pushPid(pid) != S_OK) {

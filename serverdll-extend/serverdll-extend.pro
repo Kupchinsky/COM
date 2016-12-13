@@ -1,29 +1,27 @@
 #-------------------------------------------------
 #
-# Project created by QtCreator 2016-10-12T15:58:13
+# Project created by QtCreator 2016-12-13T13:44:50
 #
 #-------------------------------------------------
 
 QT       -= gui
 
-TARGET = serverdll
+TARGET = serverdll-extend
 TEMPLATE = lib
 
-DEFINES += SERVERDLL_LIBRARY
+DEFINES += SERVERDLLEXTEND_LIBRARY
 
-SOURCES += \
-    componentimpl.cpp \
-    componentfactory.cpp \
+SOURCES += serverdllextend.cpp \
     component_i.c \
-    serverdll.cpp \
-    compoinentdispimpl.cpp
+    compoinentdispimpl.cpp \
+    componentfactory.cpp \
+    componentimpl.cpp
 
-HEADERS +=\
-    componentimpl.h \
+HEADERS += serverdllextend.h\
+        serverdll-extend_global.h \
     component.h \
     componentfactory.h \
-    serverdll.h \
-    serverdll_global.h
+    componentimpl.h
 
 unix {
     target.path = /usr/lib

@@ -4,7 +4,7 @@
 
 
  /* File created by MIDL compiler version 8.00.0603 */
-/* at Sat Dec 10 21:03:33 2016
+/* at Tue Dec 13 19:11:01 2016
  */
 /* Compiler settings for component.idl:
     Oicf, W1, Zp8, env=Win32 (32b run), target_arch=X86 8.00.0603 
@@ -109,7 +109,7 @@ EXTERN_C const IID IID_IProcessMonitor;
 #if defined(__cplusplus) && !defined(CINTERFACE)
     
     MIDL_INTERFACE("2044b06d-c185-4e6e-a4c2-078a5b6f9ed6")
-    IProcessMonitor : public IDispatch
+    IProcessMonitor : public IUnknown
     {
     public:
         virtual /* [id] */ HRESULT STDMETHODCALLTYPE updateStatuses( void) = 0;
@@ -151,43 +151,6 @@ EXTERN_C const IID IID_IProcessMonitor;
         
         ULONG ( STDMETHODCALLTYPE *Release )( 
             IProcessMonitor * This);
-        
-        HRESULT ( STDMETHODCALLTYPE *GetTypeInfoCount )( 
-            IProcessMonitor * This,
-            /* [out] */ UINT *pctinfo);
-        
-        HRESULT ( STDMETHODCALLTYPE *GetTypeInfo )( 
-            IProcessMonitor * This,
-            /* [in] */ UINT iTInfo,
-            /* [in] */ LCID lcid,
-            /* [out] */ ITypeInfo **ppTInfo);
-        
-        HRESULT ( STDMETHODCALLTYPE *GetIDsOfNames )( 
-            IProcessMonitor * This,
-            /* [in] */ REFIID riid,
-            /* [size_is][in] */ LPOLESTR *rgszNames,
-            /* [range][in] */ UINT cNames,
-            /* [in] */ LCID lcid,
-            /* [size_is][out] */ DISPID *rgDispId);
-        
-        /* [local] */ HRESULT ( STDMETHODCALLTYPE *Invoke )( 
-            IProcessMonitor * This,
-            /* [annotation][in] */ 
-            _In_  DISPID dispIdMember,
-            /* [annotation][in] */ 
-            _In_  REFIID riid,
-            /* [annotation][in] */ 
-            _In_  LCID lcid,
-            /* [annotation][in] */ 
-            _In_  WORD wFlags,
-            /* [annotation][out][in] */ 
-            _In_  DISPPARAMS *pDispParams,
-            /* [annotation][out] */ 
-            _Out_opt_  VARIANT *pVarResult,
-            /* [annotation][out] */ 
-            _Out_opt_  EXCEPINFO *pExcepInfo,
-            /* [annotation][out] */ 
-            _Out_opt_  UINT *puArgErr);
         
         /* [id] */ HRESULT ( STDMETHODCALLTYPE *updateStatuses )( 
             IProcessMonitor * This);
@@ -235,19 +198,6 @@ EXTERN_C const IID IID_IProcessMonitor;
     ( (This)->lpVtbl -> Release(This) ) 
 
 
-#define IProcessMonitor_GetTypeInfoCount(This,pctinfo)	\
-    ( (This)->lpVtbl -> GetTypeInfoCount(This,pctinfo) ) 
-
-#define IProcessMonitor_GetTypeInfo(This,iTInfo,lcid,ppTInfo)	\
-    ( (This)->lpVtbl -> GetTypeInfo(This,iTInfo,lcid,ppTInfo) ) 
-
-#define IProcessMonitor_GetIDsOfNames(This,riid,rgszNames,cNames,lcid,rgDispId)	\
-    ( (This)->lpVtbl -> GetIDsOfNames(This,riid,rgszNames,cNames,lcid,rgDispId) ) 
-
-#define IProcessMonitor_Invoke(This,dispIdMember,riid,lcid,wFlags,pDispParams,pVarResult,pExcepInfo,puArgErr)	\
-    ( (This)->lpVtbl -> Invoke(This,dispIdMember,riid,lcid,wFlags,pDispParams,pVarResult,pExcepInfo,puArgErr) ) 
-
-
 #define IProcessMonitor_updateStatuses(This)	\
     ( (This)->lpVtbl -> updateStatuses(This) ) 
 
@@ -283,7 +233,7 @@ EXTERN_C const IID IID_IProcessMonitorRegistrar;
 #if defined(__cplusplus) && !defined(CINTERFACE)
     
     MIDL_INTERFACE("2044b06d-c185-4e6e-a4c2-078a5b6f9ed7")
-    IProcessMonitorRegistrar : public IDispatch
+    IProcessMonitorRegistrar : public IUnknown
     {
     public:
         virtual /* [id] */ HRESULT STDMETHODCALLTYPE pushPid( 
@@ -319,43 +269,6 @@ EXTERN_C const IID IID_IProcessMonitorRegistrar;
         
         ULONG ( STDMETHODCALLTYPE *Release )( 
             IProcessMonitorRegistrar * This);
-        
-        HRESULT ( STDMETHODCALLTYPE *GetTypeInfoCount )( 
-            IProcessMonitorRegistrar * This,
-            /* [out] */ UINT *pctinfo);
-        
-        HRESULT ( STDMETHODCALLTYPE *GetTypeInfo )( 
-            IProcessMonitorRegistrar * This,
-            /* [in] */ UINT iTInfo,
-            /* [in] */ LCID lcid,
-            /* [out] */ ITypeInfo **ppTInfo);
-        
-        HRESULT ( STDMETHODCALLTYPE *GetIDsOfNames )( 
-            IProcessMonitorRegistrar * This,
-            /* [in] */ REFIID riid,
-            /* [size_is][in] */ LPOLESTR *rgszNames,
-            /* [range][in] */ UINT cNames,
-            /* [in] */ LCID lcid,
-            /* [size_is][out] */ DISPID *rgDispId);
-        
-        /* [local] */ HRESULT ( STDMETHODCALLTYPE *Invoke )( 
-            IProcessMonitorRegistrar * This,
-            /* [annotation][in] */ 
-            _In_  DISPID dispIdMember,
-            /* [annotation][in] */ 
-            _In_  REFIID riid,
-            /* [annotation][in] */ 
-            _In_  LCID lcid,
-            /* [annotation][in] */ 
-            _In_  WORD wFlags,
-            /* [annotation][out][in] */ 
-            _In_  DISPPARAMS *pDispParams,
-            /* [annotation][out] */ 
-            _Out_opt_  VARIANT *pVarResult,
-            /* [annotation][out] */ 
-            _Out_opt_  EXCEPINFO *pExcepInfo,
-            /* [annotation][out] */ 
-            _Out_opt_  UINT *puArgErr);
         
         /* [id] */ HRESULT ( STDMETHODCALLTYPE *pushPid )( 
             IProcessMonitorRegistrar * This,
@@ -395,19 +308,6 @@ EXTERN_C const IID IID_IProcessMonitorRegistrar;
 
 #define IProcessMonitorRegistrar_Release(This)	\
     ( (This)->lpVtbl -> Release(This) ) 
-
-
-#define IProcessMonitorRegistrar_GetTypeInfoCount(This,pctinfo)	\
-    ( (This)->lpVtbl -> GetTypeInfoCount(This,pctinfo) ) 
-
-#define IProcessMonitorRegistrar_GetTypeInfo(This,iTInfo,lcid,ppTInfo)	\
-    ( (This)->lpVtbl -> GetTypeInfo(This,iTInfo,lcid,ppTInfo) ) 
-
-#define IProcessMonitorRegistrar_GetIDsOfNames(This,riid,rgszNames,cNames,lcid,rgDispId)	\
-    ( (This)->lpVtbl -> GetIDsOfNames(This,riid,rgszNames,cNames,lcid,rgDispId) ) 
-
-#define IProcessMonitorRegistrar_Invoke(This,dispIdMember,riid,lcid,wFlags,pDispParams,pVarResult,pExcepInfo,puArgErr)	\
-    ( (This)->lpVtbl -> Invoke(This,dispIdMember,riid,lcid,wFlags,pDispParams,pVarResult,pExcepInfo,puArgErr) ) 
 
 
 #define IProcessMonitorRegistrar_pushPid(This,pid)	\

@@ -7,7 +7,7 @@ object,
 uuid(2044b06d-c185-4e6e-a4c2-078a5b6f9ed6),
 local
 ]
-interface IProcessMonitor: IDispatch
+interface IProcessMonitor: IUnknown
 {
     [id(1)] HRESULT updateStatuses();
 
@@ -29,7 +29,7 @@ object,
 uuid(2044b06d-c185-4e6e-a4c2-078a5b6f9ed7),
 local
 ]
-interface IProcessMonitorRegistrar: IDispatch
+interface IProcessMonitorRegistrar: IUnknown
 {
     [id(1)] HRESULT pushPid(unsigned int pid);
     [id(2)] HRESULT removePid(unsigned int pid);
@@ -47,19 +47,18 @@ properties:
     [id(1)] unsigned int LastError;
     [id(2)] BSTR LastErrorMsg;
 
+    [id(3)] unsigned int StatusPid;
+    [id(4)] BSTR StatusPname;
+    [id(5)] unsigned int Status;
+
 methods:
-    [id(3)] HRESULT PushPid(unsigned int pid);
-    [id(4)] HRESULT RemovePid(unsigned int pid);
-    [id(5)] HRESULT ClearPids();
+    [id(6)] HRESULT PushPid(unsigned int pid);
+    [id(7)] HRESULT RemovePid(unsigned int pid);
+    [id(8)] HRESULT ClearPids();
 
-    [id(6)] HRESULT UpdateStatuses();
-    [id(7)] HRESULT GetChangedStatusFirst(	[out] unsigned int *pid,
-											[out] LPBSTR pname,
-											[out] unsigned int *status);
-
-	[id(8)] HRESULT GetChangedStatusNext(	[out] unsigned int *pid,
-											[out] LPBSTR pname,
-											[out] unsigned int *status);
+    [id(9)] HRESULT UpdateStatuses();
+    [id(10)] HRESULT GetChangedStatusFirst();
+	[id(11)] HRESULT GetChangedStatusNext();
 };
 
 [

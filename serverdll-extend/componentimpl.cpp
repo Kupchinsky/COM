@@ -197,21 +197,21 @@ HRESULT STDMETHODCALLTYPE CProcessMonitorImpl::updateStatuses(void) {
         HANDLE hProcess = iterator.value();
         DWORD status;
 
-        qDebug() << LOGTAG << "Process" << pid;
+        qDebug() << "Process" << pid;
 
         if (GetExitCodeProcess(hProcess, &status) == TRUE) {
             bool isChanged = false;
 
             if (oldStatuses.contains(pid)) {
-                qDebug() << LOGTAG << "Old status" << oldStatuses[pid];
+                qDebug() << "Old status" << oldStatuses[pid];
 
                 if (oldStatuses[pid] != status) {
-                    qDebug() << LOGTAG << "Changed" << status;
+                    qDebug() << "Changed" << status;
                     isChanged = true;
                     oldStatuses[pid] = status;
                 }
             } else {
-                qDebug() << LOGTAG << "No old status -> changed" << status;
+                qDebug() << "No old status -> changed" << status;
                 isChanged = true;
                 oldStatuses.insert(pid, status);
             }
@@ -222,7 +222,7 @@ HRESULT STDMETHODCALLTYPE CProcessMonitorImpl::updateStatuses(void) {
                 if (status != STILL_ACTIVE) {
                     CloseHandle(hProcess);
 
-                    qDebug() << LOGTAG << "Removed" << ppidnames[pid] << pid;
+                    qDebug() << "Removed" << ppidnames[pid] << pid;
 
                     oldStatuses.remove(pid);
                     ppidnames.remove(pid);
@@ -336,11 +336,9 @@ HRESULT STDMETHODCALLTYPE CProcessMonitorImpl::getLastError(unsigned int *code,
 
 void CProcessMonitorImpl::setError(unsigned int code, QString msg) {
     lastErrorLock.lock();
-    errorsLock.lock();
     iLastError = code;
-    lastErrorMsg = errors[code] + (msg.length() != 0 ? " [" + msg + "]" : "");
+    lastErrorMsg = msg;
     lastErrorLock.unlock();
-    errorsLock.unlock();
 }
 
 QString CProcessMonitorImpl::getLastErrorMsg() {

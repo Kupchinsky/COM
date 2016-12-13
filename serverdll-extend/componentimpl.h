@@ -9,8 +9,6 @@
 #include <QMapIterator>
 #include <QString>
 
-#define LOGTAG "CProcessMonitorImpl >>"
-
 class CProcessMonitorImpl:
         public IProcessMonitorDisp,
         public IProcessMonitor,
@@ -21,11 +19,6 @@ class CProcessMonitorImpl:
     // IDispatch related
     QMap<QString, DISPID> dispIdNames;
     QMutex dispIdNamesLock;
-
-    unsigned int dispCurrentStatusPid = 0;
-    QString dispCurrentStatusPname;
-    unsigned int dispCurrentStatus = 0;
-    QMutex dispCurrentStatusLock;
 
     //
     unsigned int iLastError = 0;
@@ -98,21 +91,17 @@ public:
         errors[103] = "Process with same pid already registered";
         errors[104] = "Empty parameter";
         errors[105] = "Something went wrong";
-        errors[106] = "Invalid argument";
         errorsLock.unlock();
 
         dispIdNamesLock.lock();
         dispIdNames.insert("LastError", 1);
         dispIdNames.insert("LastErrorMsg", 2);
-        dispIdNames.insert("StatusPid", 3);
-        dispIdNames.insert("StatusPname", 4);
-        dispIdNames.insert("Status", 5);
-        dispIdNames.insert("pushPid", 6);
-        dispIdNames.insert("removePid", 7);
-        dispIdNames.insert("clearPids", 8);
-        dispIdNames.insert("updateStatuses", 9);
-        dispIdNames.insert("getChangedStatusFirst", 10);
-        dispIdNames.insert("getChangedStatusNext", 11);
+        dispIdNames.insert("pushPid", 3);
+        dispIdNames.insert("removePid", 4);
+        dispIdNames.insert("clearPids", 5);
+        dispIdNames.insert("updateStatuses", 6);
+        dispIdNames.insert("getChangedStatusFirst", 7);
+        dispIdNames.insert("getChangedStatusNext", 8);
         dispIdNamesLock.unlock();
     }
 
