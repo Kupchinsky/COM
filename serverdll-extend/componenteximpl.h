@@ -119,6 +119,8 @@ public:
         errorsLock.unlock();
 
         dispIdNamesLock.lock();
+        dispIdNames.insert("RemovePid", 7);
+        dispIdNames.insert("ClearPids", 8);
         dispIdNames.insert("UpdateStatuses", 9);
         dispIdNames.insert("RegisterProcessByName", 12);
         dispIdNames.insert("UnregisterProcessByName", 13);

@@ -55,17 +55,32 @@ HRESULT STDMETHODCALLTYPE CProcessMonitorExImpl::pushPid(unsigned int pid) {
 
 HRESULT STDMETHODCALLTYPE CProcessMonitorExImpl::removePid(unsigned int pid) {
     setError(0);
-    return this->delegatePMR->removePid(pid);
+    HRESULT result = this->delegatePMR->removePid(pid);
+
+    if (result == S_OK) {
+        ppidnamesLock.lock();
+        ppidnames.remove(pid);
+        ppidnamesLock.unlock();
+    }
+
+    return result;
 }
 
 HRESULT STDMETHODCALLTYPE CProcessMonitorExImpl::clearPids() {
     setError(0);
-    return this->delegatePMR->clearPids();
+    HRESULT result = this->delegatePMR->clearPids();
+
+    if (result == S_OK) {
+        ppidnamesLock.lock();
+        ppidnames.clear();
+        ppidnamesLock.unlock();
+    }
+
+    return result;
 }
 
 HRESULT STDMETHODCALLTYPE CProcessMonitorExImpl::updateStatuses(void) {
     setError(0);
-
     pnamesLock.lock();
 
     // Check newly created processes
@@ -77,6 +92,10 @@ HRESULT STDMETHODCALLTYPE CProcessMonitorExImpl::updateStatuses(void) {
 
         if (Process32First(snapshot, &entry) == TRUE) {
             while (Process32Next(snapshot, &entry) == TRUE) {
+                if (ppidnames.contains(entry.th32ProcessID)) {
+                    continue;
+                }
+
                 QString pname = QString::fromWCharArray(entry.szExeFile);
 
                 foreach (QString name, pnames) {
@@ -93,6 +112,8 @@ HRESULT STDMETHODCALLTYPE CProcessMonitorExImpl::updateStatuses(void) {
 
         CloseHandle(snapshot);
     }
+
+    // TODO: check ppidnames for non existing processes ?
 
     pnamesLock.unlock();
     return this->delegatePM->updateStatuses();
@@ -111,7 +132,7 @@ HRESULT STDMETHODCALLTYPE CProcessMonitorExImpl::getChangedStatusNext(unsigned i
                                                                     unsigned int *pnamelen,
                                                                     unsigned int *status) {
     setError(0);
-    return this->delegatePM->getChangedStatusFirst(pid, pname, pnamelen, status);
+    return this->delegatePM->getChangedStatusNext(pid, pname, pnamelen, status);
 }
 
 HRESULT STDMETHODCALLTYPE CProcessMonitorExImpl::registerProcessByName(BSTR name) {
@@ -164,7 +185,7 @@ HRESULT STDMETHODCALLTYPE CProcessMonitorExImpl::unregisterProcessByName(BSTR na
             iterator.next();
 
             if (iterator.value().compare(nameStr, Qt::CaseInsensitive) == 0) {
-                this->removePid(iterator.key());
+                this->delegatePMR->removePid(iterator.key());
                 iterator.remove();
             }
         }
@@ -188,7 +209,7 @@ HRESULT STDMETHODCALLTYPE CProcessMonitorExImpl::unregisterAllNames() {
     QMapIterator<unsigned int, QString> iterator(ppidnames);
     while (iterator.hasNext()) {
         iterator.next();
-        this->removePid(iterator.key());
+        this->delegatePMR->removePid(iterator.key());
     }
 
     ppidnames.clear();

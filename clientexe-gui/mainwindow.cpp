@@ -4,6 +4,7 @@
 
 #include <QMessageBox>
 #include <QTime>
+#include <QStandardItemModel>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -11,8 +12,9 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     CoInitialize(NULL);
 
-    ResultChecker::check(CoCreateInstance(LIBID_ProcessManager, NULL, CLSCTX_INPROC_SERVER,
+    ResultChecker::check(CoCreateInstance(LIBID_ProcessManagerEx, NULL, CLSCTX_INPROC_SERVER,
                                           IID_IProcessMonitor, (void**) &iPM));
+    ResultChecker::check(iPM->QueryInterface(IID_IProcessMonitorRegistrarEx, (void**) &iPMREx));
 
     ui->setupUi(this);
     ui->tableWidget->setColumnCount(4);
@@ -26,16 +28,17 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->tableWidget->setHorizontalHeaderLabels(lbls);
     ui->tableWidget->verticalHeader()->setVisible(false);
 
-    ui->tableWidgetR->setColumnCount(2);
+    ui->iPMRExTableWidget->setColumnCount(1);
 
     QStringList lbls2;
-    lbls2.append("Pid/Name");
-    lbls2.append("Type");
+    lbls2.append("Pattern");
 
-    ui->tableWidgetR->setHorizontalHeaderLabels(lbls2);
-    ui->tableWidgetR->verticalHeader()->setVisible(false);
-    ui->tableWidgetR->setSelectionBehavior(QAbstractItemView::SelectRows);
-    ui->tableWidgetR->setSelectionMode(QAbstractItemView::SingleSelection);
+    ui->iPMRExTableWidget->setHorizontalHeaderLabels(lbls2);
+    ui->iPMRExTableWidget->verticalHeader()->setVisible(false);
+    ui->iPMRExTableWidget->setSelectionBehavior(QAbstractItemView::SelectRows);
+    ui->iPMRExTableWidget->setSelectionMode(QAbstractItemView::SingleSelection);
+
+    ui->listView->setModel(new QStandardItemModel());
 
     qRegisterMetaType<QMap<uint,QPair<uint,QString> >>("QMap<uint,QPair<uint,QString> >");
 }
@@ -50,86 +53,8 @@ MainWindow::~MainWindow()
     }
 
     iPM->Release();
+    iPMREx->Release();
     CoUninitialize();
-}
-
-void MainWindow::on_pushButton_2_clicked()
-{
-    // Pid
-    if (ui->radioButton->isChecked()) {
-        uint pid = ui->lineEdit->text().toUInt();
-
-        if (iPM->registerProcessByPid(pid) != S_OK) {
-            this->showError();
-        } else {
-            int row = ui->tableWidgetR->rowCount();
-
-            ui->tableWidgetR->insertRow(row);
-            ui->tableWidgetR->setItem(row, 0, new QTableWidgetItem(QString::number(pid)));
-            ui->tableWidgetR->setItem(row, 1, new QTableWidgetItem("Pid"));
-
-            ui->lineEdit->clear();
-        }
-    } else {
-        QString pName = ui->lineEdit->text();
-
-        if (iPM->registerProcessByName((wchar_t*) pName.toStdWString().c_str()) != S_OK) {
-            this->showError();
-        } else {
-            int row = ui->tableWidgetR->rowCount();
-
-            ui->tableWidgetR->insertRow(row);
-            ui->tableWidgetR->setItem(row, 0, new QTableWidgetItem(pName));
-            ui->tableWidgetR->setItem(row, 1, new QTableWidgetItem("Name pattern"));
-
-            ui->lineEdit->clear();
-        }
-    }
-}
-
-void MainWindow::on_pushButton_3_clicked()
-{
-    if (iPM->unregisterAllProcesses() != S_OK) {
-        this->showError();
-    } else {
-        ui->tableWidgetR->setRowCount(0);
-    }
-}
-
-void MainWindow::on_pushButton_4_clicked()
-{
-    QItemSelectionModel *select = ui->tableWidgetR->selectionModel();
-
-    if (select->hasSelection()) {
-        QModelIndexList modellist = select->selectedRows();
-
-        if (modellist.size() != 0) {
-            QModelIndex modelIndex = modellist.at(0);
-            int row = modelIndex.row();
-
-            QString value = ui->tableWidgetR->item(row, 0)->text();
-            QString type = ui->tableWidgetR->item(row, 1)->text();
-
-            HRESULT result;
-
-            if (type == "Pid") {
-                result = iPM->unregisterProcessByPid(value.toUInt());
-            } else {
-                result = iPM->unregisterProcessByName((wchar_t*)value.toStdWString().c_str());
-            }
-
-            if (result != S_OK) {
-                this->showError();
-            } else {
-                ui->tableWidgetR->removeRow(row);
-            }
-
-            return;
-        }
-    }
-
-    QMessageBox::warning(ui->centralWidget, "Error", "No selection!",
-                         QMessageBox::Ok, QMessageBox::NoButton);
 }
 
 void MainWindow::showErrorMessage(QWidget *parent, IProcessMonitor *iPM) {
@@ -181,13 +106,13 @@ void MainWindow::on_checkBox_stateChanged(int arg1)
 
 void MainWindow::on_pushButton_5_clicked()
 {
-    iPM->updateStatuses();
+    if (iPM->updateStatuses() != S_OK) {
+        unsigned int code;
+        iPM->getLastError(&code, NULL, NULL);
 
-    unsigned int code;
-    iPM->getLastError(&code, NULL, NULL);
-
-    if (code != 0) {
-        this->showError();
+        if (code != 0) {
+            this->showError();
+        }
     }
 
     QMap<unsigned int, QPair<unsigned int, QString>> statuses;
@@ -244,4 +169,99 @@ void MainWindow::handleResults(QMap<unsigned int, QPair<unsigned int, QString>> 
 void MainWindow::on_pushButton_clicked()
 {
     ui->tableWidget->setRowCount(0);
+}
+
+void MainWindow::on_pushButton_7_clicked()
+{
+    if (iPMREx->clearPids() != S_OK) {
+        this->showError();
+    } else {
+        QAbstractItemModel *model = ui->listView->model();
+        model->removeRows(0, model->rowCount());
+    }
+}
+
+void MainWindow::on_iPMRExRegisterBtn_clicked()
+{
+    QString pName = ui->iPMRExInput->text();
+
+    if (iPMREx->registerProcessByName((wchar_t*) pName.toStdWString().c_str()) != S_OK) {
+        this->showError();
+    } else {
+        int row = ui->iPMRExTableWidget->rowCount();
+
+        ui->iPMRExTableWidget->insertRow(row);
+        ui->iPMRExTableWidget->setItem(row, 0, new QTableWidgetItem(pName));
+        ui->iPMRExInput->clear();
+    }
+}
+
+void MainWindow::on_iPMRExUnregisterBtn_clicked()
+{
+    QItemSelectionModel *select = ui->iPMRExTableWidget->selectionModel();
+
+    if (select->hasSelection()) {
+        QModelIndexList modellist = select->selectedRows();
+
+        if (modellist.size() != 0) {
+            QModelIndex modelIndex = modellist.at(0);
+            int row = modelIndex.row();
+
+            QString value = ui->iPMRExTableWidget->item(row, 0)->text();
+
+            if (iPMREx->unregisterProcessByName((wchar_t*)value.toStdWString().c_str()) != S_OK) {
+                this->showError();
+            } else {
+                ui->iPMRExTableWidget->removeRow(row);
+            }
+
+            return;
+        }
+    }
+
+    QMessageBox::warning(ui->centralWidget, "Error", "No selection!",
+                         QMessageBox::Ok, QMessageBox::NoButton);
+}
+
+void MainWindow::on_iPMRExUnregisterAllBtn_clicked()
+{
+    if (iPMREx->unregisterAllNames() != S_OK) {
+        this->showError();
+    } else {
+        ui->iPMRExTableWidget->setRowCount(0);
+    }
+}
+
+void MainWindow::on_pushButton_8_clicked()
+{
+    QStandardItemModel *model = static_cast<QStandardItemModel*>(ui->listView->model());
+
+    foreach(const QModelIndex &index, ui->listView->selectionModel()->selectedIndexes()) {
+        QString strPid = model->itemFromIndex(index)->text();
+
+        if (iPMREx->removePid(strPid.toUInt()) != S_OK) {
+            this->showError();
+        } else {
+            model->removeRow(index.row());
+        }
+    }
+}
+
+void MainWindow::on_pushButton_6_clicked()
+{
+    QString strPid = ui->lineEdit_2->text().trimmed();
+
+    if (strPid.length() == 0) {
+        return;
+    }
+
+    if (iPMREx->pushPid(strPid.toUInt()) != S_OK) {
+        this->showError();
+    } else {
+        QStandardItem* item = new QStandardItem(strPid);
+        QStandardItemModel *model = static_cast<QStandardItemModel*>(ui->listView->model());
+        model->appendRow(item);
+
+        ui->lineEdit_2->setText("");
+    }
 }

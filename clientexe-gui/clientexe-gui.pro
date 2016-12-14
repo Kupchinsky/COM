@@ -14,7 +14,8 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    ../serverdll/component_i.c
+    ../serverdll/component_i.c \
+    ../serverdll-extend/componentex_i.c
 
 HEADERS  += mainwindow.h
 

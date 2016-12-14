@@ -101,6 +101,21 @@ HRESULT STDMETHODCALLTYPE CProcessMonitorExImpl::Invoke(DISPID dispIdMember, REF
     } else if (QString::compare(name, "UpdateStatuses", Qt::CaseInsensitive) == 0) {
         isBoolResult = true;
         result = this->updateStatuses();
+    } else if (QString::compare(name, "ClearPids", Qt::CaseInsensitive) == 0) {
+        isBoolResult = true;
+        result = this->clearPids();
+    } else if (QString::compare(name, "RemovePid", Qt::CaseInsensitive) == 0) {
+        DISPPARAMS param = *pDispParams;
+        VARIANT arg1 = (param.rgvarg)[0];
+        HRESULT res = VariantChangeType(&arg1, &arg1, 0, VT_UINT);
+
+        if (res != S_OK) {
+            *puArgErr = 1;
+            this->setError(206, "1");
+        } else {
+            isBoolResult = true;
+            result = this->removePid(arg1.uintVal);
+        }
     } else {
         return this->delegateDisp->Invoke(dispIdMember, riid, lcid, wFlags, pDispParams,
                                           pVarResult, pExcepInfo, puArgErr);

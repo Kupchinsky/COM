@@ -7,6 +7,7 @@
 #include <QString>
 #include <QPair>
 #include "../serverdll/component.h"
+#include "../serverdll-extend/componentex.h"
 
 namespace Ui {
 class MainWindow;
@@ -23,12 +24,6 @@ public:
     ~MainWindow();
 
 private slots:
-    void on_pushButton_2_clicked();
-
-    void on_pushButton_3_clicked();
-
-    void on_pushButton_4_clicked();
-
     void on_pushButton_5_clicked();
 
     void on_checkBox_stateChanged(int arg1);
@@ -37,9 +32,22 @@ private slots:
 
     void on_pushButton_clicked();
 
+    void on_pushButton_7_clicked();
+
+    void on_iPMRExRegisterBtn_clicked();
+
+    void on_iPMRExUnregisterBtn_clicked();
+
+    void on_iPMRExUnregisterAllBtn_clicked();
+
+    void on_pushButton_8_clicked();
+
+    void on_pushButton_6_clicked();
+
 private:
     Ui::MainWindow *ui;
     IProcessMonitor *iPM;
+    IProcessMonitorRegistrarEx *iPMREx;
     QThread *backgroundThread = NULL;
 
     void showError();
@@ -72,13 +80,13 @@ public slots:
         while (isWorking) {
             Sleep(2000);
 
-            iPM->updateStatuses();
+            if (iPM->updateStatuses() != S_OK) {
+                unsigned int code;
+                iPM->getLastError(&code, NULL, NULL);
 
-            unsigned int code;
-            iPM->getLastError(&code, NULL, NULL);
-
-            if (code != 0) {
-                MainWindow::showErrorMessage(NULL, this->iPM);
+                if (code != 0) {
+                    MainWindow::showErrorMessage(NULL, this->iPM);
+                }
             }
 
             statuses.clear();
